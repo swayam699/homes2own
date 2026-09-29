@@ -3,6 +3,8 @@
 > **A Production-Grade College Full-Stack Capstone Project**  
 > Built with **React.js**, **Tailwind CSS**, **Node.js**, **Express.js**, **MySQL 8.0**, **Jest + Supertest**, **Docker**, and **Jenkins**.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swayam699/online-food-ordering-system)
+
 ---
 
 ## 📌 Project Overview
