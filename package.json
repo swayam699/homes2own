@@ -1,0 +1,28 @@
+{
+  "name": "online-food-ordering-system",
+  "version": "1.0.0",
+  "description": "Production-style Online Food Ordering System with React, Node.js, Express, MySQL, Jest, Docker, and Jenkins",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "node -e \"const { spawn } = require('child_process'); const b = spawn('npm', ['--prefix', 'backend', 'start'], { stdio: 'inherit', shell: true }); const f = spawn('npm', ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { b.kill(); f.kill(); process.exit(); });\"",
+    "start": "npm --prefix backend start",
+    "test": "npm --prefix backend test",
+    "build": "npm --prefix frontend run build",
+    "db:init": "npm --prefix backend run db:init",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install"
+  },
+  "keywords": [
+    "food-ordering",
+    "react",
+    "express",
+    "mysql",
+    "docker",
+    "jenkins",
+    "jest",
+    "jwt",
+    "tailwind"
+  ],
+  "author": "College Full-Stack Capstone Project",
+  "license": "ISC"
+}
