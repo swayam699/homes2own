@@ -23,12 +23,18 @@ const DB_CONFIG = {
  */
 const initSqlite = async (sqlitePath) => {
   return new Promise((resolve, reject) => {
-    const dbDir = path.dirname(sqlitePath);
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
+    let targetPath = sqlitePath;
+    try {
+      const dbDir = path.dirname(targetPath);
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+      }
+    } catch (e) {
+      console.warn('[Database] Could not create target directory, falling back to /tmp:', e.message);
+      targetPath = path.resolve('/tmp', 'food_ordering.sqlite');
     }
 
-    const db = new sqlite3.Database(sqlitePath, (err) => {
+    const db = new sqlite3.Database(targetPath, (err) => {
       if (err) return reject(err);
       
       // Register custom functions for MySQL compatibility

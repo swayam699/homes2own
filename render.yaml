@@ -10,9 +10,11 @@ services:
     plan: free
     region: oregon
     rootDir: .
-    buildCommand: npm run install:all && npm run build
-    startCommand: npm start
+    buildCommand: bash render-build.sh
+    startCommand: cd backend && node src/server.js
     envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: NODE_ENV
         value: production
       - key: PORT

@@ -2,15 +2,17 @@
   "name": "online-food-ordering-system",
   "version": "1.0.0",
   "description": "Production-style Online Food Ordering System with React, Node.js, Express, MySQL, Jest, Docker, and Jenkins",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "build": "bash render-build.sh",
+    "start": "cd backend && node src/server.js",
+    "test": "cd backend && npm test",
+    "db:init": "cd backend && node src/scripts/initDb.js",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
-    "dev": "node -e \"const { spawn } = require('child_process'); const b = spawn('npm', ['--prefix', 'backend', 'start'], { stdio: 'inherit', shell: true }); const f = spawn('npm', ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { b.kill(); f.kill(); process.exit(); });\"",
-    "start": "npm --prefix backend start",
-    "test": "npm --prefix backend test",
-    "build": "npm --prefix frontend run build",
-    "db:init": "npm --prefix backend run db:init",
-    "install:all": "npm --prefix backend install && npm --prefix frontend install"
+    "dev": "node -e \"const { spawn } = require('child_process'); const b = spawn('npm', ['--prefix', 'backend', 'start'], { stdio: 'inherit', shell: true }); const f = spawn('npm', ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { b.kill(); f.kill(); process.exit(); });\""
   },
   "keywords": [
     "food-ordering",

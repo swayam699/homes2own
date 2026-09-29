@@ -51,6 +51,7 @@ __pycache__/
 venv/
 
 # Legacy hardware files
+start_tunnel.js
 check_esp32.py
 esp32_client/
 platformio.ini
