@@ -6,9 +6,9 @@
     "node": ">=20.0.0"
   },
   "scripts": {
+    "build": "npm --prefix backend install --include=dev && npm --prefix frontend install --include=dev && npm --prefix frontend run build",
     "start": "node backend/src/server.js",
     "test": "cd backend && npm test",
-    "build": "cd frontend && npm run build",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "seed": "cd backend && node src/scripts/initDb.js"

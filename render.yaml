@@ -1,11 +1,12 @@
 # =====================================================================
 # Render.com Blueprint Deployment Specification
-# Deploys both Backend API and compiled React Frontend as a single service
+# HOMES2OWN — Full-Stack Mumbai Real Estate Consultancy Platform
+# Deploys unified Backend REST API & compiled Vite Single Page Application
 # =====================================================================
 
 services:
   - type: web
-    name: cravecart-online-food-system
+    name: homes2own-platform
     env: node
     plan: free
     region: oregon
@@ -25,3 +26,13 @@ services:
         value: 7d
       - key: DB_CLIENT
         value: sqlite
+      - key: APP_DOMAIN
+        value: homes2own.com
+      - key: WHATSAPP_PHONE
+        value: "919820155443"
+      - key: CONSULTANT_EMAIL
+        value: advisory@homes2own.com
+      - key: OFFICE_PHONE
+        value: "+912261208800"
+      - key: RATE_LIMIT_MAX
+        value: "200"
