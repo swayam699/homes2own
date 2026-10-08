@@ -532,7 +532,7 @@ export default function HomePage() {
               Open Consultation Form
             </button>
             <p className="text-[11px] text-[#71716D] text-center">
-              Or call our Mumbai headquarters directly at <strong className="text-[#242521]">+91 22 6120 8800</strong>
+              Or call our Mumbai headquarters directly at <strong className="text-[#242521]">+91 96645 86316</strong>
             </p>
           </div>
         </div>

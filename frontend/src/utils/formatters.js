@@ -63,7 +63,7 @@ export const formatDate = (dateStr) => {
  * WhatsApp consultant link generator with encoded advisory message
  */
 export const getWhatsAppLink = (phone, propertyTitle) => {
-  const consultantNumber = phone || '+919820155443';
+  const consultantNumber = phone || '+919664586316';
   const cleaned = consultantNumber.replace(/[^\d]/g, '');
   const message = encodeURIComponent(
     `Hello HOMES2OWN, I am interested in exploring ${propertyTitle || 'properties in Mumbai'}. Please share details and availability.`

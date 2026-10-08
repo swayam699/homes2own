@@ -575,7 +575,7 @@ export default function PropertyDetailPage() {
               <div className="border-t border-[#F0ECE4] pt-4 space-y-2.5 text-xs">
                 {/* WhatsApp Action */}
                 <a
-                  href={getWhatsAppLink('+919820155443', property.title)}
+                  href={getWhatsAppLink('+919664586316', property.title)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xs transition-colors font-medium text-[11px]"
@@ -639,7 +639,7 @@ export default function PropertyDetailPage() {
                 Senior Advisor — Western Suburbs & South Mumbai Luxury
               </p>
               <div className="pt-1 text-[11px] text-[#242521] font-medium">
-                Direct Desk: +91 98201 55443
+                Direct Desk: +91 96645 86316
               </div>
             </div>
 
@@ -735,7 +735,7 @@ export default function PropertyDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <a
-            href={getWhatsAppLink('+919820155443', property.title)}
+            href={getWhatsAppLink('+919664586316', property.title)}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 bg-emerald-700 text-white rounded-xs"

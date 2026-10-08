@@ -12,13 +12,20 @@ export default function Footer() {
           
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="inline-block">
-              <span className="font-serif text-2xl tracking-widest text-white font-semibold">
-                HOMES<span className="text-[#777B5A]">2</span>OWN
-              </span>
-              <p className="text-[10px] tracking-[0.25em] text-[#A8A296] uppercase mt-0.5">
-                Mumbai Property Advisory & Consultancy
-              </p>
+            <Link to="/" className="flex items-center gap-3">
+              <img
+                src="/logo.jpg"
+                alt="HOMES2OWN Logo"
+                className="w-12 h-12 object-contain rounded-xs bg-white/5 p-1"
+              />
+              <div>
+                <span className="font-serif text-2xl tracking-widest text-white font-semibold">
+                  HOMES<span className="text-[#777B5A]">2</span>OWN
+                </span>
+                <p className="text-[10px] tracking-[0.25em] text-[#A8A296] uppercase mt-0.5">
+                  Mumbai Property Advisory & Consultancy
+                </p>
+              </div>
             </Link>
             <p className="text-xs text-[#C2BCB0] leading-relaxed max-w-sm">
               HOMES2OWN is a premier real estate advisory firm dedicated to navigating Mumbai’s most sought-after residential and commercial property markets with bespoke architectural insight and end-to-end transaction expertise.
@@ -26,11 +33,11 @@ export default function Footer() {
             <div className="pt-2 text-xs text-[#A8A296] space-y-1.5">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#777B5A] shrink-0" />
-                <span>Level 9, Platina Corporate Tower, Bandra Kurla Complex (BKC), Mumbai 400051</span>
+                <span>Chembur, Mumbai - 400071, Maharashtra, India</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#777B5A] shrink-0" />
-                <span>+91 22 6120 8800 / +91 98201 55443</span>
+                <span>+91 96645 86316</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#777B5A] shrink-0" />

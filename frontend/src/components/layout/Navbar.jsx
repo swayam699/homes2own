@@ -47,15 +47,22 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Brand Wordmark */}
+          {/* Brand Wordmark & Logo */}
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex flex-col">
-              <span className="font-serif text-2xl sm:text-3xl tracking-widest text-[#242521] font-semibold">
-                HOMES<span className="text-[#777B5A]">2</span>OWN
-              </span>
-              <span className="text-[10px] tracking-[0.25em] text-[#71716D] uppercase -mt-1 font-sans">
-                Mumbai Property Advisory
-              </span>
+            <Link to="/" className="flex items-center gap-3 group">
+              <img
+                src="/logo.jpg"
+                alt="HOMES2OWN Logo"
+                className="w-12 h-12 object-contain rounded-xs shadow-xs group-hover:scale-105 transition-transform"
+              />
+              <div className="flex flex-col">
+                <span className="font-serif text-2xl sm:text-3xl tracking-widest text-[#242521] font-semibold leading-tight">
+                  HOMES<span className="text-[#777B5A]">2</span>OWN
+                </span>
+                <span className="text-[10px] tracking-[0.25em] text-[#71716D] uppercase font-sans">
+                  Mumbai Property Advisory
+                </span>
+              </div>
             </Link>
 
             {/* Desktop Navigation Links */}

@@ -7,16 +7,23 @@ export default function AboutPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
       
       {/* Intro Header */}
-      <div className="max-w-3xl space-y-4">
-        <span className="text-xs uppercase tracking-widest text-[#777B5A] font-semibold block">
-          Corporate Ethos
-        </span>
-        <h1 className="font-serif text-4xl sm:text-5xl font-light text-[#242521] leading-tight">
-          Advising Mumbai’s Most Discerning Property Buyers Since 2012.
-        </h1>
-        <p className="text-sm text-[#71716D] leading-relaxed">
-          HOMES2OWN operates as a private client real estate advisory and consultancy practice based in Mumbai. We provide architectural evaluation, financial modeling, and discrete transaction guidance for high-net-worth families, institutional investors, and corporate occupiers.
-        </p>
+      <div className="flex flex-col md:flex-row items-start gap-8">
+        <img
+          src="/logo.jpg"
+          alt="HOMES2OWN Emblem"
+          className="w-24 h-24 object-contain rounded-xs border border-[#D9D4C9] bg-white p-2 shadow-subtle shrink-0"
+        />
+        <div className="max-w-3xl space-y-4">
+          <span className="text-xs uppercase tracking-widest text-[#777B5A] font-semibold block">
+            Corporate Ethos
+          </span>
+          <h1 className="font-serif text-4xl sm:text-5xl font-light text-[#242521] leading-tight">
+            Advising Mumbai’s Most Discerning Property Buyers Since 2012.
+          </h1>
+          <p className="text-sm text-[#71716D] leading-relaxed">
+            HOMES2OWN operates as a private client real estate advisory and consultancy practice based in Mumbai. We provide architectural evaluation, financial modeling, and discrete transaction guidance for high-net-worth families, institutional investors, and corporate occupiers.
+          </p>
+        </div>
       </div>
 
       {/* 3 Pillars */}
@@ -56,11 +63,11 @@ export default function AboutPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-[#3C3E2C] text-xs">
           <div className="space-y-2">
-            <h4 className="font-serif text-lg font-bold text-white">BKC Headquarters</h4>
+            <h4 className="font-serif text-lg font-bold text-white">Chembur Headquarters</h4>
             <p className="text-[#A8A296] leading-relaxed">
-              Level 9, Platina Corporate Tower, G Block, Bandra Kurla Complex, Mumbai 400051
+              Chembur, Mumbai - 400071, Maharashtra, India
             </p>
-            <p className="text-[#D9D4C9]">Direct Line: +91 22 6120 8800</p>
+            <p className="text-[#D9D4C9]">Direct Line: +91 96645 86316</p>
           </div>
           <div className="space-y-2">
             <h4 className="font-serif text-lg font-bold text-white">Worli Coastal Desk</h4>

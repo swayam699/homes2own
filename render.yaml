@@ -29,10 +29,10 @@ services:
       - key: APP_DOMAIN
         value: homes2own.com
       - key: WHATSAPP_PHONE
-        value: "919820155443"
+        value: "919664586316"
       - key: CONSULTANT_EMAIL
         value: advisory@homes2own.com
       - key: OFFICE_PHONE
-        value: "+912261208800"
+        value: "+919664586316"
       - key: RATE_LIMIT_MAX
         value: "200"

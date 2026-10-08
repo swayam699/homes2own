@@ -60,9 +60,9 @@ export default function ContactPage() {
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-[#777B5A] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-[#242521] block">Bandra Kurla Complex (BKC) Office</strong>
+                <strong className="text-[#242521] block">Mumbai Advisory Office</strong>
                 <p className="text-[#71716D] mt-0.5">
-                  Level 9, Platina Corporate Tower, G Block, BKC, Bandra East, Mumbai, Maharashtra 400051
+                  Chembur, Mumbai - 400071, Maharashtra, India
                 </p>
               </div>
             </div>
@@ -71,7 +71,7 @@ export default function ContactPage() {
               <Phone className="w-5 h-5 text-[#777B5A] shrink-0 mt-0.5" />
               <div>
                 <strong className="text-[#242521] block">Telephone Advisory Desk</strong>
-                <p className="text-[#71716D] mt-0.5">+91 22 6120 8800 / +91 98201 55443</p>
+                <p className="text-[#71716D] mt-0.5">+91 96645 86316</p>
               </div>
             </div>
 
