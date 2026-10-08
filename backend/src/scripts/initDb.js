@@ -7,12 +7,12 @@ const DB_CONFIG = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '3306', 10),
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'root',
+  password: process.env.DB_PASSWORD || '',
   multipleStatements: true,
 };
 
 async function initMySQL() {
-  console.log('--- Initializing MySQL Database ---');
+  console.log('--- Initializing HOMES2OWN MySQL Database ---');
   console.log(`Connecting to MySQL host: ${DB_CONFIG.host}:${DB_CONFIG.port} with user: ${DB_CONFIG.user}...`);
 
   try {
@@ -26,7 +26,7 @@ async function initMySQL() {
       console.log('Executing schema.sql...');
       const schemaSql = fs.readFileSync(schemaPath, 'utf8');
       await connection.query(schemaSql);
-      console.log('Schema created successfully.');
+      console.log('HOMES2OWN Schema created successfully.');
     } else {
       console.warn(`schema.sql not found at ${schemaPath}`);
     }
@@ -35,16 +35,16 @@ async function initMySQL() {
       console.log('Executing seed.sql...');
       const seedSql = fs.readFileSync(seedPath, 'utf8');
       await connection.query(seedSql);
-      console.log('Seed data inserted successfully.');
+      console.log('HOMES2OWN Seed data inserted successfully.');
     } else {
       console.warn(`seed.sql not found at ${seedPath}`);
     }
 
     await connection.end();
-    console.log('MySQL initialization completed successfully!');
+    console.log('HOMES2OWN MySQL initialization completed successfully!');
   } catch (error) {
-    console.error('MySQL initialization failed:', error.message);
-    console.log('Note: If running in development without a local MySQL password, the app will automatically use embedded SQLite.');
+    console.error('MySQL initialization notice:', error.message);
+    console.log('Note: If running in standalone development without active MySQL daemon, the app automatically runs on built-in SQLite engine with matching schema & seed.');
   }
 }
 

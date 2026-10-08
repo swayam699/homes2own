@@ -1,249 +1,360 @@
--- =====================================================================
--- Online Food Ordering System - Database Schema (MySQL 8.0+)
--- Production-grade, fully normalized relational schema
--- =====================================================================
+-- ============================================================================
+-- HOMES2OWN — Database Schema (MySQL 8.0+)
+-- Production-style Real Estate Consultancy & Property Management Platform
+-- Primary Market: Mumbai, Maharashtra, India
+-- ============================================================================
 
-CREATE DATABASE IF NOT EXISTS food_ordering_db
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+DROP DATABASE IF EXISTS homes2own_db;
+CREATE DATABASE homes2own_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE homes2own_db;
 
-USE food_ordering_db;
-
--- Disable foreign key checks for clean teardown during migrations
-SET FOREIGN_KEY_CHECKS = 0;
-
-DROP TABLE IF EXISTS order_tracking;
-DROP TABLE IF EXISTS payments;
-DROP TABLE IF EXISTS order_items;
-DROP TABLE IF EXISTS orders;
-DROP TABLE IF EXISTS coupons;
-DROP TABLE IF EXISTS cart_items;
-DROP TABLE IF EXISTS carts;
-DROP TABLE IF EXISTS menu_items;
-DROP TABLE IF EXISTS menu_categories;
-DROP TABLE IF EXISTS restaurants;
-DROP TABLE IF EXISTS users;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
--- ---------------------------------------------------------------------
--- 1. USERS TABLE
--- Roles: 'customer', 'restaurant_admin', 'admin'
--- ---------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
+-- 1. USERS & ROLES
+-- Roles: 'customer', 'consultant', 'admin'
+-- ----------------------------------------------------------------------------
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(191) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    phone VARCHAR(20),
-    role ENUM('customer', 'restaurant_admin', 'admin') NOT NULL DEFAULT 'customer',
-    address TEXT,
-    city VARCHAR(100) DEFAULT 'Mumbai',
+    phone VARCHAR(30),
+    role ENUM('customer', 'consultant', 'admin') NOT NULL DEFAULT 'customer',
+    avatar_url VARCHAR(500),
+    preferred_locations TEXT,
+    preferred_configurations TEXT,
+    min_budget DECIMAL(14, 2),
+    max_budget DECIMAL(14, 2),
     is_active TINYINT(1) NOT NULL DEFAULT 1,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_users_email (email),
-    INDEX idx_users_role (role)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_role (role),
+    INDEX idx_user_email (email)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 2. RESTAURANTS TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE restaurants (
+-- ----------------------------------------------------------------------------
+-- 2. DEVELOPERS / BUILDERS
+-- Top Mumbai real estate developers with verified or demonstration status
+-- ----------------------------------------------------------------------------
+CREATE TABLE developers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
-    slug VARCHAR(160) NOT NULL UNIQUE,
+    slug VARCHAR(191) NOT NULL UNIQUE,
+    logo_url VARCHAR(500),
     description TEXT,
-    address VARCHAR(255) NOT NULL,
-    city VARCHAR(100) NOT NULL DEFAULT 'Mumbai',
-    phone VARCHAR(20),
-    rating DECIMAL(2,1) NOT NULL DEFAULT 4.5,
-    total_ratings INT NOT NULL DEFAULT 120,
-    delivery_time_min INT NOT NULL DEFAULT 25,
-    delivery_time_max INT NOT NULL DEFAULT 35,
-    price_for_two DECIMAL(10,2) NOT NULL DEFAULT 400.00,
-    cuisine_types VARCHAR(255) NOT NULL,
-    image_url TEXT,
-    banner_url TEXT,
-    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    website VARCHAR(255),
+    contact_email VARCHAR(191),
+    contact_phone VARCHAR(50),
+    established_year INT,
+    is_verified TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_developer_slug (slug)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 3. MUMBAI LOCATIONS & LOCALITIES
+-- Key residential & commercial hubs in Mumbai
+-- ----------------------------------------------------------------------------
+CREATE TABLE locations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    slug VARCHAR(150) NOT NULL UNIQUE,
+    region VARCHAR(100) NOT NULL,
+    overview TEXT,
+    landmark VARCHAR(255),
+    avg_price_sqft DECIMAL(10, 2) DEFAULT 0.00,
+    property_count INT NOT NULL DEFAULT 0,
+    image_url VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_location_slug (slug),
+    INDEX idx_location_region (region)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 4. PROPERTIES
+-- Core property listings across residential, commercial, resale, and rentals
+-- ----------------------------------------------------------------------------
+CREATE TABLE properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    developer_id INT,
+    location_id INT NOT NULL,
+    transaction_type ENUM('Buy', 'Rent') NOT NULL DEFAULT 'Buy',
+    property_type ENUM('Apartment', 'Villa', 'Penthouse', 'Office', 'Shop', 'Commercial', 'Plot') NOT NULL DEFAULT 'Apartment',
+    configuration ENUM('Studio', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '5 BHK+') NOT NULL DEFAULT '2 BHK',
+    bedrooms INT DEFAULT 2,
+    bathrooms INT DEFAULT 2,
+    carpet_area DECIMAL(10, 2) NOT NULL,
+    built_up_area DECIMAL(10, 2),
+    price DECIMAL(14, 2) NOT NULL,
+    price_per_sqft DECIMAL(12, 2) GENERATED ALWAYS AS (
+        CASE WHEN carpet_area > 0 THEN ROUND(price / carpet_area, 2) ELSE 0.00 END
+    ) STORED,
+    floor_number INT DEFAULT 1,
+    total_floors INT DEFAULT 20,
+    possession_status ENUM('Ready to Move', 'Under Construction', 'Upcoming') NOT NULL DEFAULT 'Ready to Move',
+    possession_date VARCHAR(100),
+    rera_number VARCHAR(100) DEFAULT 'Not provided',
+    parking_spaces INT DEFAULT 1,
+    furnishing ENUM('Unfurnished', 'Semi-Furnished', 'Fully Furnished') NOT NULL DEFAULT 'Semi-Furnished',
+    availability_status ENUM('Available', 'Limited Availability', 'Sold', 'Rented', 'Coming Soon') NOT NULL DEFAULT 'Available',
     is_featured TINYINT(1) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_restaurants_slug (slug),
-    INDEX idx_restaurants_active (is_active),
-    INDEX idx_restaurants_rating (rating),
-    INDEX idx_restaurants_city (city)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    is_published TINYINT(1) NOT NULL DEFAULT 1,
+    address TEXT NOT NULL,
+    overview TEXT,
+    highlights TEXT,
+    specifications TEXT,
+    connectivity TEXT,
+    nearby_landmarks TEXT,
+    investment_considerations TEXT,
+    brochure_url VARCHAR(500),
+    is_demo TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_property_developer FOREIGN KEY (developer_id) REFERENCES developers(id) ON DELETE SET NULL,
+    CONSTRAINT fk_property_location FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE CASCADE,
+    INDEX idx_prop_type_trans (property_type, transaction_type),
+    INDEX idx_prop_config (configuration),
+    INDEX idx_prop_price (price),
+    INDEX idx_prop_status (availability_status),
+    INDEX idx_prop_featured (is_featured),
+    INDEX idx_prop_published (is_published)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 3. MENU CATEGORIES TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE menu_categories (
+-- ----------------------------------------------------------------------------
+-- 5. PROPERTY IMAGES & FLOOR PLANS
+-- Categorized architectural photography
+-- ----------------------------------------------------------------------------
+CREATE TABLE property_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    property_id INT NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    caption VARCHAR(255),
+    category ENUM('exterior', 'interior', 'amenity', 'floor_plan') NOT NULL DEFAULT 'exterior',
+    is_primary TINYINT(1) NOT NULL DEFAULT 0,
     display_order INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
-    INDEX idx_categories_restaurant (restaurant_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_image_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    INDEX idx_img_property (property_id, is_primary)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 4. MENU ITEMS TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE menu_items (
+-- ----------------------------------------------------------------------------
+-- 6. AMENITIES
+-- Standardized high-end residential & commercial amenities
+-- ----------------------------------------------------------------------------
+CREATE TABLE amenities (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    category_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(120) NOT NULL UNIQUE,
+    category VARCHAR(100) DEFAULT 'General',
+    icon VARCHAR(60) DEFAULT 'CheckCircle',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 7. PROPERTY AMENITIES (M:N junction)
+-- ----------------------------------------------------------------------------
+CREATE TABLE property_amenities (
+    property_id INT NOT NULL,
+    amenity_id INT NOT NULL,
+    PRIMARY KEY (property_id, amenity_id),
+    CONSTRAINT fk_pa_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    CONSTRAINT fk_pa_amenity FOREIGN KEY (amenity_id) REFERENCES amenities(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 8. CUSTOMER FAVOURITES
+-- Persisted wishlist in MySQL
+-- ----------------------------------------------------------------------------
+CREATE TABLE favourites (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    property_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_fav (user_id, property_id),
+    CONSTRAINT fk_fav_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_fav_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 9. PROPERTY COMPARISONS
+-- Persisted comparison queue (max 3 per customer)
+-- ----------------------------------------------------------------------------
+CREATE TABLE property_comparisons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    property_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_comp (user_id, property_id),
+    CONSTRAINT fk_comp_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comp_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 10. ENQUIRIES
+-- General property enquiry submissions
+-- ----------------------------------------------------------------------------
+CREATE TABLE enquiries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    property_id INT,
     name VARCHAR(150) NOT NULL,
-    description TEXT,
-    price DECIMAL(10,2) NOT NULL,
-    image_url TEXT,
-    is_veg TINYINT(1) NOT NULL DEFAULT 1,
-    is_available TINYINT(1) NOT NULL DEFAULT 1,
-    is_popular TINYINT(1) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES menu_categories(id) ON DELETE CASCADE,
-    INDEX idx_menu_restaurant (restaurant_id),
-    INDEX idx_menu_category (category_id),
-    INDEX idx_menu_available (is_available),
-    INDEX idx_menu_popular (is_popular)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    email VARCHAR(191) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
+    preferred_contact_method ENUM('phone', 'whatsapp', 'email') NOT NULL DEFAULT 'phone',
+    message TEXT NOT NULL,
+    status ENUM('new', 'contacted', 'qualified', 'converted', 'closed') NOT NULL DEFAULT 'new',
+    assigned_consultant_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_enq_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_enq_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    CONSTRAINT fk_enq_consultant FOREIGN KEY (assigned_consultant_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_enq_status (status),
+    INDEX idx_enq_created (created_at)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 5. CARTS TABLE
--- Each customer has an active cart associated with a single restaurant
--- ---------------------------------------------------------------------
-CREATE TABLE carts (
+-- ----------------------------------------------------------------------------
+-- 11. SITE VISITS
+-- Scheduled in-person or virtual property tours
+-- ----------------------------------------------------------------------------
+CREATE TABLE site_visits (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    restaurant_id INT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE SET NULL,
-    UNIQUE KEY uniq_user_cart (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ---------------------------------------------------------------------
--- 6. CART ITEMS TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE cart_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    cart_id INT NOT NULL,
-    menu_item_id INT NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    unit_price DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
-    FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE,
-    UNIQUE KEY uniq_cart_item (cart_id, menu_item_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ---------------------------------------------------------------------
--- 7. COUPONS TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE coupons (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE,
-    description VARCHAR(255),
-    discount_type ENUM('percentage', 'fixed') NOT NULL DEFAULT 'percentage',
-    discount_value DECIMAL(10,2) NOT NULL,
-    min_order_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    max_discount DECIMAL(10,2) NOT NULL DEFAULT 500.00,
-    is_active TINYINT(1) NOT NULL DEFAULT 1,
-    expires_at TIMESTAMP NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_coupons_code (code),
-    INDEX idx_coupons_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ---------------------------------------------------------------------
--- 8. ORDERS TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_number VARCHAR(50) NOT NULL UNIQUE,
-    user_id INT NOT NULL,
-    restaurant_id INT NOT NULL,
-    subtotal DECIMAL(10,2) NOT NULL,
-    delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 40.00,
-    tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    total_amount DECIMAL(10,2) NOT NULL,
-    coupon_code VARCHAR(50),
-    status ENUM('placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled') NOT NULL DEFAULT 'placed',
-    delivery_address TEXT NOT NULL,
-    customer_phone VARCHAR(20) NOT NULL,
+    user_id INT,
+    property_id INT NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(191) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
+    preferred_date DATE NOT NULL,
+    preferred_time VARCHAR(50) NOT NULL,
+    visitor_count INT NOT NULL DEFAULT 1,
     notes TEXT,
-    estimated_delivery_time VARCHAR(50) DEFAULT '30-40 mins',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE RESTRICT,
-    INDEX idx_orders_user (user_id),
-    INDEX idx_orders_restaurant (restaurant_id),
-    INDEX idx_orders_status (status),
-    INDEX idx_orders_number (order_number)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    status ENUM('Requested', 'Approved', 'Rescheduled', 'Rejected', 'Completed') NOT NULL DEFAULT 'Requested',
+    consultant_id INT,
+    consultant_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sv_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_sv_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    CONSTRAINT fk_sv_consultant FOREIGN KEY (consultant_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_sv_status (status),
+    INDEX idx_sv_date (preferred_date)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 9. ORDER ITEMS TABLE
--- ---------------------------------------------------------------------
-CREATE TABLE order_items (
+-- ----------------------------------------------------------------------------
+-- 12. CALLBACK REQUESTS
+-- Urgent advisory callback requests
+-- ----------------------------------------------------------------------------
+CREATE TABLE callbacks (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    menu_item_id INT,
-    item_name VARCHAR(150) NOT NULL,
-    quantity INT NOT NULL,
-    unit_price DECIMAL(10,2) NOT NULL,
-    total_price DECIMAL(10,2) NOT NULL,
-    is_veg TINYINT(1) NOT NULL DEFAULT 1,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE SET NULL,
-    INDEX idx_order_items_order (order_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    user_id INT,
+    property_id INT,
+    name VARCHAR(150) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
+    preferred_time VARCHAR(100),
+    message TEXT,
+    status ENUM('Pending', 'Assigned', 'Contacted', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending',
+    consultant_id INT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cb_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_cb_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    CONSTRAINT fk_cb_consultant FOREIGN KEY (consultant_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_cb_status (status)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 10. PAYMENTS TABLE
--- Realistic payment simulation tracking
--- ---------------------------------------------------------------------
-CREATE TABLE payments (
+-- ----------------------------------------------------------------------------
+-- 13. CRM LEADS
+-- Pipeline management for consultants & admin
+-- ----------------------------------------------------------------------------
+CREATE TABLE leads (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    user_id INT NOT NULL,
-    payment_method ENUM('cod', 'upi', 'card', 'online') NOT NULL,
-    payment_status ENUM('pending', 'completed', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
-    transaction_id VARCHAR(100) UNIQUE,
-    amount DECIMAL(10,2) NOT NULL,
-    payment_details TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_payments_order (order_id),
-    INDEX idx_payments_user (user_id),
-    INDEX idx_payments_status (payment_status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    customer_id INT,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(191),
+    phone VARCHAR(30) NOT NULL,
+    property_id INT,
+    source ENUM('enquiry', 'site_visit', 'callback', 'direct', 'referral') NOT NULL DEFAULT 'enquiry',
+    status ENUM('New', 'Contacted', 'Qualified', 'Site Visit Scheduled', 'Site Visit Completed', 'Negotiation', 'Converted', 'Lost') NOT NULL DEFAULT 'New',
+    deal_value DECIMAL(14, 2) DEFAULT 0.00,
+    assigned_consultant_id INT,
+    last_follow_up TIMESTAMP NULL,
+    next_follow_up TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_lead_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_lead_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL,
+    CONSTRAINT fk_lead_consultant FOREIGN KEY (assigned_consultant_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_lead_status (status),
+    INDEX idx_lead_consultant (assigned_consultant_id)
+) ENGINE=InnoDB;
 
--- ---------------------------------------------------------------------
--- 11. ORDER TRACKING TABLE
--- Granular tracking events for live stage transitions
--- ---------------------------------------------------------------------
-CREATE TABLE order_tracking (
+-- ----------------------------------------------------------------------------
+-- 14. LEAD NOTES & TIMELINE
+-- Internal consultation log notes
+-- ----------------------------------------------------------------------------
+CREATE TABLE lead_notes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    status_label VARCHAR(100) NOT NULL,
-    description TEXT,
+    lead_id INT NOT NULL,
+    author_id INT NOT NULL,
+    note TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ln_lead FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ln_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 15. FOLLOW-UPS
+-- Scheduled consultant tasks and interactions
+-- ----------------------------------------------------------------------------
+CREATE TABLE follow_ups (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    lead_id INT NOT NULL,
+    consultant_id INT NOT NULL,
+    scheduled_at DATETIME NOT NULL,
+    follow_up_type ENUM('call', 'meeting', 'site_visit', 'whatsapp', 'email') NOT NULL DEFAULT 'call',
+    notes TEXT,
+    status ENUM('scheduled', 'completed', 'missed', 'cancelled') NOT NULL DEFAULT 'scheduled',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_fu_lead FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    CONSTRAINT fk_fu_consultant FOREIGN KEY (consultant_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 16. PROJECT STATUS TIMELINE
+-- Tracks real development progression
+-- Stages: Upcoming -> Launching Soon -> Launched -> Under Construction -> Possession -> Ready to Move
+-- ----------------------------------------------------------------------------
+CREATE TABLE project_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NOT NULL,
+    stage ENUM('Upcoming', 'Launching Soon', 'Launched', 'Under Construction', 'Possession', 'Ready to Move') NOT NULL DEFAULT 'Under Construction',
+    completion_percentage INT DEFAULT 0,
+    target_date VARCHAR(100),
+    notes TEXT,
     updated_by_user_id INT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (updated_by_user_id) REFERENCES users(id) ON DELETE SET NULL,
-    INDEX idx_tracking_order (order_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ps_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ps_user FOREIGN KEY (updated_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- 17. AUDIT LOGS
+-- Sensitive administrative and CRM actions log
+-- ----------------------------------------------------------------------------
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id INT,
+    details TEXT,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_audit_created (created_at)
+) ENGINE=InnoDB;

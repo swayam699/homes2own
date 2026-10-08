@@ -1,48 +1,44 @@
-/**
- * Lightweight API client for REST endpoints with JWT handling
- */
+import axios from 'axios';
 
-const API_BASE_URL = ''; // Relative path leverages Vite dev proxy & prod reverse proxy
+// In development, Vite proxies /api to http://localhost:5000 (or uses relative in production)
+const API_URL = import.meta.env.VITE_API_URL || '';
 
-export const apiRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('cravecart_token');
-
-  const headers = {
+const client = axios.create({
+  baseURL: API_URL,
+  headers: {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
+  },
+  timeout: 15000,
+});
 
-  const url = `${API_BASE_URL}${endpoint}`;
+// Request interceptor to attach JWT token
+client.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('homes2own_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      const error = new Error(data.message || `Request failed with status ${response.status}`);
-      error.status = response.status;
-      error.data = data;
-      throw error;
+// Response interceptor to handle errors cleanly
+client.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      'An unexpected network error occurred.';
+    
+    // Automatically clear token on 401 unauth
+    if (error.response?.status === 401 && localStorage.getItem('homes2own_token')) {
+      // Allow caller to handle redirect or state clear
     }
 
-    return data;
-  } catch (err) {
-    throw err;
+    return Promise.reject(new Error(message));
   }
-};
+);
 
-export const api = {
-  get: (endpoint, headers) => apiRequest(endpoint, { method: 'GET', headers }),
-  post: (endpoint, body, headers) =>
-    apiRequest(endpoint, { method: 'POST', body: JSON.stringify(body), headers }),
-  put: (endpoint, body, headers) =>
-    apiRequest(endpoint, { method: 'PUT', body: JSON.stringify(body), headers }),
-  patch: (endpoint, body, headers) =>
-    apiRequest(endpoint, { method: 'PATCH', body: JSON.stringify(body), headers }),
-  delete: (endpoint, headers) => apiRequest(endpoint, { method: 'DELETE', headers }),
-};
+export default client;

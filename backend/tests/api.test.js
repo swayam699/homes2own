@@ -2,17 +2,17 @@ const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/config/db');
 
-describe('Online Food Ordering System - Integration & API Test Suite', () => {
+describe('HOMES2OWN Real Estate Consultancy Platform - Integration & API Test Suite', () => {
   let customerToken = '';
   let customerId = null;
+  let consultantToken = '';
   let adminToken = '';
-  let restaurantId = null;
-  let menuItemId = null;
-  let cartItemId = null;
-  let createdOrderId = null;
+  let samplePropertyId = 1;
+  let createdEnquiryId = null;
+  let createdSiteVisitId = null;
 
   beforeAll(async () => {
-    // Ensure DB connection is initialized
+    // Initialize database
     await db.getDbConnection();
   });
 
@@ -21,33 +21,33 @@ describe('Online Food Ordering System - Integration & API Test Suite', () => {
   });
 
   // -------------------------------------------------------------
-  // 1. Health check
+  // 1. Health check & Brand verification
   // -------------------------------------------------------------
   describe('Health API', () => {
-    it('should return 200 and healthy status', async () => {
+    it('should return 200 and healthy status for HOMES2OWN platform', async () => {
       const res = await request(app).get('/api/health');
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('healthy');
+      expect(res.body.service).toContain('HOMES2OWN');
+      expect(res.body.market).toContain('Mumbai');
     });
   });
 
   // -------------------------------------------------------------
-  // 2. Authentication Tests (Registration & Login)
+  // 2. Authentication & Authorization Tests
   // -------------------------------------------------------------
-  describe('Authentication Endpoints', () => {
-    const testEmail = `tester_${Date.now()}@example.com`;
+  describe('Customer Authentication Endpoints', () => {
+    const testEmail = `mumbai_buyer_${Date.now()}@example.com`;
     const testPassword = 'Password123!';
 
     it('should register a new customer successfully', async () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          name: 'College Evaluator',
+          name: 'Vikramaditya Oberoi',
           email: testEmail,
           password: testPassword,
-          phone: '+91 98765 00000',
-          address: '404 Campus Road, Tech Park',
-          city: 'Mumbai',
+          phone: '+91 98200 44556',
         });
 
       expect(res.status).toBe(201);
@@ -61,11 +61,11 @@ describe('Online Food Ordering System - Integration & API Test Suite', () => {
       customerId = res.body.user.id;
     });
 
-    it('should reject registration with duplicate email', async () => {
+    it('should reject registration with duplicate email address', async () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          name: 'Duplicate User',
+          name: 'Duplicate Buyer',
           email: testEmail,
           password: testPassword,
         });
@@ -86,6 +86,7 @@ describe('Online Food Ordering System - Integration & API Test Suite', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.token).toBeDefined();
       expect(res.body.user.email).toBe(testEmail);
+      expect(res.body.user.password_hash).toBeUndefined(); // Never expose password hash
     });
 
     it('should reject login with wrong password', async () => {
@@ -93,11 +94,25 @@ describe('Online Food Ordering System - Integration & API Test Suite', () => {
         .post('/api/auth/login')
         .send({
           email: testEmail,
-          password: 'IncorrectPassword!',
+          password: 'WrongPassword!',
         });
 
       expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);
+    });
+
+    it('should log in demo consultant account', async () => {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'consultant@example.com',
+          password: 'Password123!',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.user.role).toBe('consultant');
+      consultantToken = res.body.token;
     });
 
     it('should log in demo admin account', async () => {
@@ -113,194 +128,377 @@ describe('Online Food Ordering System - Integration & API Test Suite', () => {
       expect(res.body.user.role).toBe('admin');
       adminToken = res.body.token;
     });
-  });
 
-  // -------------------------------------------------------------
-  // 3. Restaurants Retrieval & Filtering
-  // -------------------------------------------------------------
-  describe('Restaurants Endpoints', () => {
-    it('should retrieve list of all active restaurants', async () => {
-      const res = await request(app).get('/api/restaurants');
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data.length).toBeGreaterThan(0);
-
-      restaurantId = res.body.data[0].id;
-    });
-
-    it('should filter restaurants by cuisine', async () => {
-      const res = await request(app).get('/api/restaurants?cuisine=Indian');
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.every((r) => r.cuisine_types.includes('Indian'))).toBe(true);
-    });
-
-    it('should retrieve restaurant details with full menu categories', async () => {
-      const res = await request(app).get(`/api/restaurants/${restaurantId}`);
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.id).toBe(restaurantId);
-      expect(Array.isArray(res.body.data.categories)).toBe(true);
-      expect(res.body.data.categories.length).toBeGreaterThan(0);
-
-      // Find first available menu item
-      const firstCat = res.body.data.categories.find((c) => c.items && c.items.length > 0);
-      if (firstCat && firstCat.items.length > 0) {
-        menuItemId = firstCat.items[0].id;
-      }
-    });
-  });
-
-  // -------------------------------------------------------------
-  // 4. Menu Retrieval & Search
-  // -------------------------------------------------------------
-  describe('Menu Endpoints', () => {
-    it('should search dishes by query', async () => {
-      const res = await request(app).get('/api/menu?search=Biryani');
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.length).toBeGreaterThan(0);
-      expect(res.body.data[0].name.toLowerCase()).toContain('biryani');
-    });
-
-    it('should retrieve single menu item by ID', async () => {
-      const res = await request(app).get(`/api/menu/${menuItemId || 1}`);
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.id).toBe(menuItemId || 1);
-    });
-  });
-
-  // -------------------------------------------------------------
-  // 5. Cart Operations
-  // -------------------------------------------------------------
-  describe('Cart Endpoints', () => {
-    it('should return empty cart initially for new customer', async () => {
+    it('should retrieve current authenticated user with /api/auth/me', async () => {
       const res = await request(app)
-        .get('/api/cart')
+        .get('/api/auth/me')
         .set('Authorization', `Bearer ${customerToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.totalCount).toBe(0);
-    });
-
-    it('should add item to cart', async () => {
-      const res = await request(app)
-        .post('/api/cart/items')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .send({
-          menuItemId: menuItemId || 1,
-          quantity: 2,
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.items.length).toBeGreaterThan(0);
-      expect(res.body.data.totalCount).toBe(2);
-
-      cartItemId = res.body.data.items[0].id;
-    });
-
-    it('should update cart item quantity', async () => {
-      const res = await request(app)
-        .put(`/api/cart/items/${cartItemId}`)
-        .set('Authorization', `Bearer ${customerToken}`)
-        .send({ quantity: 3 });
-
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data.totalCount).toBe(3);
+      expect(res.body.user.email).toBe(testEmail);
     });
   });
 
   // -------------------------------------------------------------
-  // 6. Coupon Application
+  // 3. Properties Discovery, Search & Filters
   // -------------------------------------------------------------
-  describe('Coupon Endpoints', () => {
-    it('should validate and apply active coupon code WELCOME50', async () => {
-      const res = await request(app)
-        .post('/api/coupons/apply')
-        .send({
-          code: 'WELCOME50',
-          subtotal: 500,
-        });
-
+  describe('Properties Endpoints', () => {
+    it('should retrieve property listings with pagination metadata', async () => {
+      const res = await request(app).get('/api/properties');
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.code).toBe('WELCOME50');
-      expect(res.body.data.discount).toBeGreaterThan(0);
+      expect(Array.isArray(res.body.properties)).toBe(true);
+      expect(res.body.properties.length).toBeGreaterThan(0);
+      expect(res.body.pagination).toBeDefined();
+
+      samplePropertyId = res.body.properties[0].id;
     });
 
-    it('should reject invalid coupon code', async () => {
-      const res = await request(app)
-        .post('/api/coupons/apply')
-        .send({
-          code: 'NON_EXISTENT_COUPON',
-          subtotal: 500,
-        });
+    it('should search properties by keyword (e.g. Bandra)', async () => {
+      const res = await request(app).get('/api/properties?search=Bandra');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.properties.length).toBeGreaterThan(0);
+      const match = res.body.properties.some(
+        (p) =>
+          p.title.includes('Bandra') ||
+          p.location_name.includes('Bandra') ||
+          p.address.includes('Bandra')
+      );
+      expect(match).toBe(true);
+    });
 
-      expect(res.status).toBe(404);
-      expect(res.body.success).toBe(false);
+    it('should filter properties by configuration (e.g. 4 BHK)', async () => {
+      const res = await request(app).get('/api/properties?configuration=4%20BHK');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.properties.every((p) => p.configuration === '4 BHK')).toBe(true);
+    });
+
+    it('should filter properties by transaction type (Buy / Rent)', async () => {
+      const res = await request(app).get('/api/properties?transaction_type=Rent');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.properties.every((p) => p.transaction_type === 'Rent')).toBe(true);
+    });
+
+    it('should sort properties by price ascending', async () => {
+      const res = await request(app).get('/api/properties?sort=price_asc');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      if (res.body.properties.length > 1) {
+        expect(res.body.properties[0].price).toBeLessThanOrEqual(res.body.properties[1].price);
+      }
+    });
+
+    it('should retrieve full property details including gallery, developer, and amenities', async () => {
+      const res = await request(app).get(`/api/properties/${samplePropertyId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.property.id).toBe(samplePropertyId);
+      expect(Array.isArray(res.body.property.images)).toBe(true);
+      expect(Array.isArray(res.body.property.amenities)).toBe(true);
+      expect(res.body.property.location_name).toBeDefined();
     });
   });
 
   // -------------------------------------------------------------
-  // 7. Order Placement & Order Retrieval
+  // 4. Mumbai Locations & Developers
   // -------------------------------------------------------------
-  describe('Order Operations', () => {
-    it('should place an order successfully from cart items', async () => {
+  describe('Locations & Developers Endpoints', () => {
+    it('should retrieve 20 Mumbai localities with live property counts', async () => {
+      const res = await request(app).get('/api/locations');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.locations)).toBe(true);
+      expect(res.body.locations.length).toBeGreaterThanOrEqual(10);
+      expect(res.body.locations[0].name).toBeDefined();
+    });
+
+    it('should retrieve developer profiles', async () => {
+      const res = await request(app).get('/api/developers');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.developers)).toBe(true);
+      expect(res.body.developers.length).toBeGreaterThan(0);
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 5. Favourites Operations (Persisted in Database)
+  // -------------------------------------------------------------
+  describe('Favourites Endpoints', () => {
+    it('should add property to user favourites', async () => {
       const res = await request(app)
-        .post('/api/orders')
+        .post(`/api/favourites/${samplePropertyId}`)
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('should handle duplicate favourites idempotently without error', async () => {
+      const res = await request(app)
+        .post(`/api/favourites/${samplePropertyId}`)
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('should check if property is favourite', async () => {
+      const res = await request(app)
+        .get(`/api/favourites/check/${samplePropertyId}`)
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.isFavourite).toBe(true);
+    });
+
+    it('should retrieve customer saved favourites list', async () => {
+      const res = await request(app)
+        .get('/api/favourites')
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.favourites.length).toBeGreaterThan(0);
+      expect(res.body.favourites.some((f) => f.id === samplePropertyId)).toBe(true);
+    });
+
+    it('should remove property from favourites', async () => {
+      const res = await request(app)
+        .delete(`/api/favourites/${samplePropertyId}`)
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 6. Property Comparisons Tray
+  // -------------------------------------------------------------
+  describe('Comparisons Endpoints', () => {
+    it('should add property to comparison tray', async () => {
+      const res = await request(app)
+        .post(`/api/comparisons/${samplePropertyId}`)
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('should retrieve comparisons list with side-by-side specs', async () => {
+      const res = await request(app)
+        .get('/api/comparisons')
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.comparisons.length).toBeGreaterThan(0);
+    });
+
+    it('should remove property from comparison tray', async () => {
+      const res = await request(app)
+        .delete(`/api/comparisons/${samplePropertyId}`)
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 7. Enquiries Intake & Consultant CRM Processing
+  // -------------------------------------------------------------
+  describe('Enquiries Endpoints', () => {
+    it('should allow customer or guest to submit an enquiry', async () => {
+      const res = await request(app)
+        .post('/api/enquiries')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
-          deliveryAddress: 'Flat 101, Marine Drive, Mumbai',
-          customerPhone: '+91 98765 00000',
-          paymentMethod: 'upi',
-          couponCode: 'WELCOME50',
-          notes: 'Ring bell twice',
+          name: 'Vikramaditya Oberoi',
+          email: 'vikramaditya@example.com',
+          phone: '+91 98200 11223',
+          property_id: samplePropertyId,
+          preferred_contact_method: 'phone',
+          message: 'Interested in site inspection this upcoming weekend. Please arrange callback.',
         });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.orderId).toBeDefined();
-      expect(res.body.data.orderNumber).toBeDefined();
-      expect(res.body.data.status).toBe('placed');
+      expect(res.body.message).toContain('Thank you for your enquiry. A HOMES2OWN consultant will contact you shortly.');
+      expect(res.body.enquiryId).toBeDefined();
 
-      createdOrderId = res.body.data.orderId;
+      createdEnquiryId = res.body.enquiryId;
     });
 
-    it('should retrieve customer order history including newly created order', async () => {
+    it('should allow customer to view their own submitted enquiries', async () => {
       const res = await request(app)
-        .get('/api/orders')
+        .get('/api/enquiries/my')
         .set('Authorization', `Bearer ${customerToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.length).toBeGreaterThan(0);
-      expect(res.body.data[0].id).toBe(createdOrderId);
+      expect(res.body.enquiries.length).toBeGreaterThan(0);
     });
 
-    it('should retrieve order details with live tracking timeline', async () => {
+    it('should allow consultant to view all enquiries and update status', async () => {
       const res = await request(app)
-        .get(`/api/orders/${createdOrderId}`)
-        .set('Authorization', `Bearer ${customerToken}`);
+        .get('/api/enquiries')
+        .set('Authorization', `Bearer ${consultantToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.id).toBe(createdOrderId);
-      expect(Array.isArray(res.body.data.items)).toBe(true);
-      expect(Array.isArray(res.body.data.tracking)).toBe(true);
-      expect(res.body.data.tracking.length).toBeGreaterThan(0);
+
+      // Update enquiry status
+      const updateRes = await request(app)
+        .put(`/api/enquiries/${createdEnquiryId}`)
+        .set('Authorization', `Bearer ${consultantToken}`)
+        .send({ status: 'contacted' });
+
+      expect(updateRes.status).toBe(200);
+      expect(updateRes.body.success).toBe(true);
     });
   });
 
   // -------------------------------------------------------------
-  // 8. Admin Authorization & Protected Operations
+  // 8. Site Visits & Scheduling
   // -------------------------------------------------------------
-  describe('Admin Authorization & Dashboard', () => {
-    it('should reject access to admin stats for unauthorized request', async () => {
+  describe('Site Visits Endpoints', () => {
+    it('should submit a site visit request with future date', async () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 5);
+      const dateString = futureDate.toISOString().split('T')[0];
+
+      const res = await request(app)
+        .post('/api/site-visits')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({
+          name: 'Vikramaditya Oberoi',
+          email: 'vikramaditya@example.com',
+          phone: '+91 98200 11223',
+          property_id: samplePropertyId,
+          preferred_date: dateString,
+          preferred_time: '11:00 AM',
+          visitor_count: 2,
+          notes: 'Visiting with family.',
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.siteVisitId).toBeDefined();
+
+      createdSiteVisitId = res.body.siteVisitId;
+    });
+
+    it('should reject site visit request with past date', async () => {
+      const res = await request(app)
+        .post('/api/site-visits')
+        .send({
+          name: 'Test Visitor',
+          email: 'test@example.com',
+          phone: '+91 98200 00000',
+          property_id: samplePropertyId,
+          preferred_date: '2020-01-01',
+          preferred_time: '10:00 AM',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toContain('Site visit date must be today or a future date.');
+    });
+
+    it('should allow consultant to update site visit status and scheduling notes', async () => {
+      const res = await request(app)
+        .put(`/api/site-visits/${createdSiteVisitId}`)
+        .set('Authorization', `Bearer ${consultantToken}`)
+        .send({
+          status: 'Approved',
+          consultant_notes: 'Confirmed with developer sales gallery manager. Slot booked.',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 9. Callbacks Request
+  // -------------------------------------------------------------
+  describe('Callback Endpoints', () => {
+    it('should submit callback request', async () => {
+      const res = await request(app)
+        .post('/api/callbacks')
+        .send({
+          name: 'Aarav Mehta',
+          phone: '+91 98203 99887',
+          property_id: samplePropertyId,
+          preferred_time: 'Evening 6 PM',
+          message: 'Need loan eligibility information.',
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.callbackId).toBeDefined();
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 10. Consultant CRM Leads & Notes
+  // -------------------------------------------------------------
+  describe('Consultant CRM Leads', () => {
+    let leadId = 1;
+
+    it('should allow consultant to retrieve CRM pipeline leads', async () => {
+      const res = await request(app)
+        .get('/api/leads')
+        .set('Authorization', `Bearer ${consultantToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.leads)).toBe(true);
+      expect(res.body.leads.length).toBeGreaterThan(0);
+      leadId = res.body.leads[0].id;
+    });
+
+    it('should allow consultant to view lead details with notes and timeline', async () => {
+      const res = await request(app)
+        .get(`/api/leads/${leadId}`)
+        .set('Authorization', `Bearer ${consultantToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.lead.id).toBe(leadId);
+      expect(Array.isArray(res.body.lead.notes)).toBe(true);
+    });
+
+    it('should allow consultant to add internal note to lead', async () => {
+      const res = await request(app)
+        .post(`/api/leads/${leadId}/notes`)
+        .set('Authorization', `Bearer ${consultantToken}`)
+        .send({ note: 'Followed up via telephone. Client requested structural layout PDF.' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('should forbid customer from accessing CRM leads', async () => {
+      const res = await request(app)
+        .get('/api/leads')
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(res.status).toBe(403);
+    });
+  });
+
+  // -------------------------------------------------------------
+  // 11. Admin Statistics & Role Restrictions
+  // -------------------------------------------------------------
+  describe('Admin Authorization & Metrics', () => {
+    it('should reject unauthenticated access to admin stats', async () => {
       const res = await request(app).get('/api/admin/stats');
       expect(res.status).toBe(401);
     });
@@ -313,30 +511,28 @@ describe('Online Food Ordering System - Integration & API Test Suite', () => {
       expect(res.status).toBe(403);
     });
 
-    it('should permit admin role to access dashboard statistics', async () => {
+    it('should allow admin to access dashboard metrics with computed closed-deal values', async () => {
       const res = await request(app)
         .get('/api/admin/stats')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.totalCustomers).toBeDefined();
-      expect(res.body.data.totalRestaurants).toBeDefined();
-      expect(res.body.data.totalOrders).toBeDefined();
+      expect(res.body.stats.total_properties).toBeDefined();
+      expect(res.body.stats.active_listings).toBeDefined();
+      expect(res.body.stats.converted_leads).toBeDefined();
+      expect(res.body.stats.closed_deal_value).toBeDefined();
     });
 
-    it('should allow admin to update order status', async () => {
+    it('should allow admin/consultant to retrieve Recharts analytics datasets', async () => {
       const res = await request(app)
-        .patch(`/api/orders/${createdOrderId}/status`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({
-          status: 'confirmed',
-          description: 'Kitchen confirmed test order',
-        });
+        .get('/api/reports/analytics')
+        .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.status).toBe('confirmed');
+      expect(res.body.analytics.top_locations).toBeDefined();
+      expect(res.body.analytics.monthly_trends).toBeDefined();
     });
   });
 });

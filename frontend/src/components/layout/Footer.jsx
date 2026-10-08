@@ -1,110 +1,114 @@
 import React from 'react';
-import { UtensilsCrossed, ShieldCheck, Heart, GitBranch, Terminal } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Building2, MapPin, Phone, Mail, ShieldAlert, ExternalLink } from 'lucide-react';
 
-export const Footer = () => {
+export default function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-400 text-xs border-t border-slate-800 pt-16 pb-12 mt-20">
+    <footer className="bg-[#242521] text-[#EFECE3] border-t border-[#32342E] pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
-          {/* Brand */}
-          <div className="md:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold">
-                <UtensilsCrossed className="w-4 h-4" />
-              </div>
-              <span className="font-extrabold text-xl text-white tracking-tight">
-                CRAVE<span className="text-brand-500">CART</span>
+        
+        {/* Top Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-[#32342E]">
+          
+          {/* Brand Info */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link to="/" className="inline-block">
+              <span className="font-serif text-2xl tracking-widest text-white font-semibold">
+                HOMES<span className="text-[#777B5A]">2</span>OWN
               </span>
-            </div>
-            <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              Artisanal, cloud-kitchen, and heritage restaurant delivery platform built with clean production architecture, relational MySQL schemas, and interactive micro-interactions.
+              <p className="text-[10px] tracking-[0.25em] text-[#A8A296] uppercase mt-0.5">
+                Mumbai Property Advisory & Consultancy
+              </p>
+            </Link>
+            <p className="text-xs text-[#C2BCB0] leading-relaxed max-w-sm">
+              HOMES2OWN is a premier real estate advisory firm dedicated to navigating Mumbai’s most sought-after residential and commercial property markets with bespoke architectural insight and end-to-end transaction expertise.
             </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">
-                React 18
-              </span>
-              <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">
-                Tailwind CSS
-              </span>
-              <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">
-                Node.js + Express
-              </span>
-              <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">
-                MySQL 8.0
-              </span>
-              <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">
-                Docker & Jenkins
-              </span>
+            <div className="pt-2 text-xs text-[#A8A296] space-y-1.5">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#777B5A] shrink-0" />
+                <span>Level 9, Platina Corporate Tower, Bandra Kurla Complex (BKC), Mumbai 400051</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[#777B5A] shrink-0" />
+                <span>+91 22 6120 8800 / +91 98201 55443</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#777B5A] shrink-0" />
+                <span>advisory@homes2own.com</span>
+              </div>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Key Mumbai Localities */}
           <div className="space-y-3">
-            <h5 className="font-bold text-white text-xs uppercase tracking-wider">Cuisines</h5>
-            <ul className="space-y-2 text-xs">
-              <li className="hover:text-brand-400 cursor-pointer">Awadhi & Dum Biryani</li>
-              <li className="hover:text-brand-400 cursor-pointer">Woodfired Neapolitan Pizza</li>
-              <li className="hover:text-brand-400 cursor-pointer">Handcrafted Smash Burgers</li>
-              <li className="hover:text-brand-400 cursor-pointer">North Indian Comfort Food</li>
-              <li className="hover:text-brand-400 cursor-pointer">Organic & Keto Superbowls</li>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
+              Mumbai Localities
+            </h4>
+            <ul className="text-xs space-y-2 text-[#C2BCB0]">
+              <li><Link to="/properties?locality=Bandra%20West" className="hover:text-white transition-colors">Bandra West & Carter Road</Link></li>
+              <li><Link to="/properties?locality=Worli" className="hover:text-white transition-colors">Worli Sea Face</Link></li>
+              <li><Link to="/properties?locality=Lower%20Parel" className="hover:text-white transition-colors">Lower Parel & Phoenix District</Link></li>
+              <li><Link to="/properties?locality=Juhu" className="hover:text-white transition-colors">Juhu Beachfront</Link></li>
+              <li><Link to="/properties?locality=BKC" className="hover:text-white transition-colors">Bandra Kurla Complex (BKC)</Link></li>
+              <li><Link to="/properties?locality=Marine%20Drive" className="hover:text-white transition-colors">Marine Drive & Queen’s Necklace</Link></li>
+              <li><Link to="/properties?locality=Powai" className="hover:text-white transition-colors">Powai Lake Boulevard</Link></li>
+              <li><Link to="/explore-mumbai" className="text-[#777B5A] hover:underline font-medium">Explore All 20 Localities →</Link></li>
             </ul>
           </div>
 
-          {/* Demonstration Accounts */}
+          {/* Property Collections */}
           <div className="space-y-3">
-            <h5 className="font-bold text-white text-xs uppercase tracking-wider">Demo Credentials</h5>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <span className="text-slate-200 font-semibold block">Customer:</span>
-                customer@example.com
-              </li>
-              <li>
-                <span className="text-slate-200 font-semibold block">Restaurant Admin:</span>
-                restaurant@example.com
-              </li>
-              <li>
-                <span className="text-slate-200 font-semibold block">System Admin:</span>
-                admin@example.com
-              </li>
-              <li className="text-brand-400 font-mono text-[11px] pt-1">
-                Password: Password123!
-              </li>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
+              Portfolios
+            </h4>
+            <ul className="text-xs space-y-2 text-[#C2BCB0]">
+              <li><Link to="/properties?configuration=4%20BHK" className="hover:text-white transition-colors">Luxury 4 & 5 BHK Penthouses</Link></li>
+              <li><Link to="/properties?property_type=Apartment" className="hover:text-white transition-colors">Prime City Residences</Link></li>
+              <li><Link to="/properties?property_type=Villa" className="hover:text-white transition-colors">Beachfront Independent Villas</Link></li>
+              <li><Link to="/properties?property_type=Office" className="hover:text-white transition-colors">Grade-A Corporate Plates</Link></li>
+              <li><Link to="/properties?transaction_type=Rent" className="hover:text-white transition-colors">High-End Residential Leasing</Link></li>
+              <li><Link to="/properties?possession_status=Ready%20to%20Move" className="hover:text-white transition-colors">Ready to Move Resale</Link></li>
+              <li><Link to="/compare" className="hover:text-white transition-colors">Compare Properties</Link></li>
             </ul>
           </div>
 
-          {/* System & Architecture */}
+          {/* Quick Consultation & Portals */}
           <div className="space-y-3">
-            <h5 className="font-bold text-white text-xs uppercase tracking-wider">Engineering</h5>
-            <ul className="space-y-2 text-xs">
-              <li className="flex items-center gap-1.5 text-slate-300">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                JWT Auth & Role Guards
-              </li>
-              <li className="flex items-center gap-1.5 text-slate-300">
-                <Terminal className="w-3.5 h-3.5 text-sky-400" />
-                Normalized Relational DDL
-              </li>
-              <li className="flex items-center gap-1.5 text-slate-300">
-                <GitBranch className="w-3.5 h-3.5 text-orange-400" />
-                Jest + Supertest API Specs
-              </li>
-              <li className="text-[11px] text-slate-500 pt-1">
-                Full-Stack College Capstone Project
-              </li>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
+              Advisory Portals
+            </h4>
+            <ul className="text-xs space-y-2 text-[#C2BCB0]">
+              <li><Link to="/contact" className="hover:text-white transition-colors">Schedule Private Viewing</Link></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">Our Advisory Standards</Link></li>
+              <li><Link to="/dashboard" className="hover:text-white transition-colors">Client Portfolio Portal</Link></li>
+              <li><Link to="/consultant" className="hover:text-white transition-colors">Consultant CRM Access</Link></li>
+              <li><Link to="/admin" className="hover:text-white transition-colors">Administration Console</Link></li>
+              <li><Link to="/login" className="hover:text-white transition-colors">Sign In / Register</Link></li>
             </ul>
+          </div>
+
+        </div>
+
+        {/* Legal & Regulatory Demonstration Disclaimer */}
+        <div className="pt-8 space-y-4">
+          <div className="p-3.5 bg-[#2A2B27] rounded-xs border border-[#3C3E2C] flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-[#777B5A] shrink-0 mt-0.5" />
+            <p className="text-[11px] text-[#A8A296] leading-relaxed">
+              <strong className="text-white">Advisory Demonstration Notice:</strong> Properties, prices, architectural metrics, and development timelines showcased on this platform are curated demonstration representations for illustrative consultancy display. All registered trademarks, builder identities, and project titles belong to their respective proprietors. Unverified RERA numbers are marked as &ldquo;Not provided&rdquo;. Always verify statutory title documentation and sanctioned RERA certificates before executing real property contracts.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#A8A296] pt-2">
+            <p>© {new Date().getFullYear()} HOMES2OWN Real Estate Advisory. All rights reserved.</p>
+            <div className="flex items-center space-x-6 mt-3 sm:mt-0">
+              <Link to="/about" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/about" className="hover:text-white transition-colors">Terms of Advisory</Link>
+              <Link to="/contact" className="hover:text-white transition-colors">MahaRERA Advisory Code</Link>
+            </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} CraveCart Technologies Inc. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <span className="hover:text-slate-400">Privacy Policy</span>
-            <span className="hover:text-slate-400">Terms of Service</span>
-            <span className="hover:text-slate-400">REST API Docs</span>
-          </div>
-        </div>
       </div>
     </footer>
   );
-};
+}

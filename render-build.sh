@@ -3,7 +3,7 @@
 set -o errexit
 
 echo "============================================="
-echo "  CRAVECART - PRODUCTION BUILD ON RENDER     "
+echo "  HOMES2OWN - PRODUCTION BUILD SCRIPT        "
 echo "============================================="
 
 # Ensure npm installs all build dependencies
@@ -15,7 +15,7 @@ cd backend
 npm install --include=dev
 cd ..
 
-# 2. Install Frontend Dependencies (including vite & tailwind)
+# 2. Install Frontend Dependencies (including vite, react-router, tailwind)
 echo "--> Installing Frontend Dependencies..."
 cd frontend
 npm install --include=dev
@@ -26,5 +26,5 @@ npm run build
 cd ..
 
 echo "============================================="
-echo "  BUILD COMPLETE: Application Ready to Start  "
+echo "  HOMES2OWN BUILD COMPLETE: Ready to Launch  "
 echo "============================================="

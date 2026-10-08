@@ -1,442 +1,368 @@
-# CraveCart — Online Food Ordering System
+# HOMES2OWN — Mumbai Real Estate Consultancy Platform
 
-> **A Production-Grade College Full-Stack Capstone Project**  
-> Built with **React.js**, **Tailwind CSS**, **Node.js**, **Express.js**, **MySQL 8.0**, **Jest + Supertest**, **Docker**, and **Jenkins**.
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swayam699/online-food-ordering-system)
-
----
-
-## 📌 Project Overview
-
-**CraveCart** is a modern, commercial-style food ordering platform designed to avoid generic AI/vibe-coded clichés (no oversized gradients, no fake buttons, no repetitive cards, and no generic SaaS templates). It delivers an authentic culinary food-discovery experience with real-time multi-restaurant menus, intelligent cart management with restaurant switch conflict resolution, coupon validation, realistic multi-method payment simulation, and a dynamic database-driven order tracking interface.
-
-The system features three distinct user roles:
-1. **Customer:** Browse, live search dishes and restaurants, filter by cuisine/rating/price/veg, cart management, checkout with coupons and payment simulation, live order tracking, and order history.
-2. **Restaurant Partner / Manager:** Menu management (CRUD), item availability toggle, live order acceptance/rejection, and order status updates.
-3. **System Administrator:** Aggregated business metrics, revenue and orders analytics, customer management, restaurant catalog management, coupon campaign management, and live order dispatch control.
+> **A Production-Grade Full-Stack Real Estate Consultancy & Property Management Platform**  
+> Tailored for the **Mumbai, Maharashtra, India** residential and commercial property markets.  
+> Built with **React (Vite)**, **Tailwind CSS**, **Node.js**, **Express.js**, **MySQL 8.0**, **Jest + Supertest**, **Docker**, and **Jenkins**.
 
 ---
 
-## 🛠️ Technology Stack
+## 📌 1. Platform Overview & Value Proposition
 
-| Layer | Technologies Used |
-| :--- | :--- |
-| **Frontend** | React 18, Vite, Tailwind CSS 3.4, Lucide Icons |
-| **Backend** | Node.js 20+, Express.js 4.21, CORS, Morgan |
-| **Database** | MySQL 8.0 (Primary) + Zero-Downtime SQLite (Automatic Dev/Test Fallback) |
-| **Authentication** | JSON Web Tokens (JWT), bcryptjs (Salt Rounds: 10) |
-| **Testing** | Jest 29, Supertest 7 (23 passing integration tests) |
-| **DevOps & CI/CD**| Docker, Docker Compose, Multi-stage Builds, Nginx, Jenkins Pipeline |
-| **Version Control**| Git, GitHub-ready repository with `.gitignore` and `.env.example` |
+**HOMES2OWN** is an authentic, high-end real estate consultancy and property management web platform built specifically for the Mumbai luxury and prime property ecosystem. Designed to reject generic AI/vibe-coded clichés, the platform embraces an editorial architectural aesthetic inspired by modern Indian lifestyle publications and architectural monographs.
+
+### Core Value Drivers:
+- **Mumbai-Centric Architecture:** Structured from the ground up for Mumbai geography—20 distinct localities across South Mumbai, Western Suburbs, Central Mumbai, and Navi Mumbai/Thane.
+- **Indian Pricing & Metric Integrity:** Native support for Indian numerical denominations (Crores `₹ Cr`, Lakhs `₹ L`) and carpet area in square feet (`sq.ft.`), with accurate per-sq.ft. analytics.
+- **Consultancy Lead Pipeline:** Seamless multi-channel conversion including Private Viewings (Site Visits), Schedule a Callback, General Enquiries, and Direct WhatsApp Advisory integration.
+- **Consultant CRM & Deal Tracking:** Proprietary pipeline dashboard for property advisors with multi-stage lead tracking, internal consultant notes, and visit scheduling.
+- **Executive Administration Console:** Business metrics with closed-deal value calculations, Recharts distribution visuals, and complete property lifecycle management.
 
 ---
 
-## 🏛️ System Architecture
+## 🎨 2. Brand & Visual Identity
+
+The design system establishes trust, sophistication, and timeless understated luxury:
+
+| Token | Hex Code | Purpose |
+| :--- | :--- | :--- |
+| **Warm Ivory** | `#F7F5F0` | Warm, non-sterile canvas background for editorial comfort |
+| **Deep Charcoal** | `#242521` | High-contrast editorial typography, prominent headers, solid actions |
+| **Muted Stone** | `#D9D4C9` | Architectural grid borders, card outlines, subtle dividers |
+| **Restrained Olive** | `#777B5A` | Brand accent: badges, active tabs, price highlights, advisory emblems |
+| **Muted Ash** | `#71716D` | Subtitles, metadata, regulatory notices, secondary text |
+
+### Typography
+- **Headings & Brand Title:** `Cormorant Garamond` (Editorial Serif)
+- **Interface & Data:** `Plus Jakarta Sans` (Clean, contemporary sans-serif)
+
+---
+
+## 🏛️ 3. System Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Client["Frontend Client (React 18 + Tailwind CSS)"]
-        UI["Customer Web App & Admin Dashboard"]
-        State["Auth Context & Cart Context"]
-        API_Client["Lightweight API Client (JWT Bearer)"]
-        UI --> State --> API_Client
+    subgraph Client["Frontend Client (React 18 + Tailwind CSS + Vite)"]
+        UI["Discovery UI, Property Matrix & Dashboards"]
+        State["Auth Context, Comparison Tray & Notifications"]
+        AxiosClient["Axios Client (Automatic JWT Bearer Authorization)"]
+        UI --> State --> AxiosClient
     end
 
     subgraph Server["Backend REST API (Node.js + Express)"]
-        Router["Express Router & API Endpoints"]
-        AuthMiddleware["JWT Auth & Role Guard Middleware"]
-        Controllers["Controllers (Auth, Rest, Menu, Cart, Order, Admin)"]
-        Validation["Request Validation & Error Handlers"]
-        Router --> AuthMiddleware --> Controllers
-        Router --> Validation --> Controllers
+        Router["Express Router & API Endpoints (/api/...)"]
+        Security["Rate Limiting, CORS & Helmet Headers"]
+        AuthMiddleware["JWT Authentication & Role Guards (Customer, Consultant, Admin)"]
+        Controllers["16 Feature Controllers"]
+        Router --> Security --> AuthMiddleware --> Controllers
     end
 
-    subgraph DataLayer["Relational Database Layer"]
-        DB_Adapter["Unified Database Driver (mysql2 / sqlite3)"]
-        MySQL_DB[("MySQL 8.0 Database (food_ordering_db)")]
-        SQLite_DB[("SQLite Embedded Fallback")]
-        DB_Adapter -->|Primary| MySQL_DB
-        DB_Adapter -->|Dev/Test Fallback| SQLite_DB
+    subgraph Database["Relational Data Layer"]
+        DBDriver["Unified DB Layer (mysql2 / sqlite3 dual driver)"]
+        MySQL_DB[("MySQL 8.0 Primary (homes2own_db)")]
+        SQLite_DB[("Embedded SQLite Zero-Setup Engine")]
+        Controllers --> DBDriver
+        DBDriver -->|Production / Docker| MySQL_DB
+        DBDriver -->|Local Dev / Test Fallback| SQLite_DB
     end
-
-    API_Client <-->|REST API (JSON)| Router
-    Controllers <--> DB_Adapter
 ```
 
 ---
 
-## 📊 Database Architecture & ER Diagram
+## 🛠️ 4. Technology Stack & Justification
 
-The database schema is fully normalized into Third Normal Form (3NF) with foreign key constraints, indexes, unique constraints, and audit timestamps.
+| Layer | Technology | Justification |
+| :--- | :--- | :--- |
+| **Frontend UI** | React 18 (Vite) | Lightning-fast HMR, component reusability, modular architecture |
+| **Styling** | Tailwind CSS 3.4 | Editorial utility-first styling with custom palette and typography |
+| **Routing** | React Router v7 | Declarative routing with URL parameter filter persistence |
+| **Data Visuals** | Recharts | Responsive SVG charts for property distributions and lead stages |
+| **Icons** | Lucide React | Clean, scalable vector iconography |
+| **Backend Runtime**| Node.js 20+ & Express 4 | High-throughput asynchronous REST API with lean memory profile |
+| **Database** | MySQL 8.0 + SQLite | ACID compliance, relational integrity, dual-driver local zero-friction setup |
+| **Authentication** | JWT & bcryptjs | Stateless authorization with 10 salt rounds password hashing |
+| **Testing** | Jest 29 + Supertest 7 | Automated integration coverage spanning all 18 Section 27 test cases |
+| **Containerization**| Docker & Docker Compose | Multi-stage production container builds with Nginx alpine reverse proxy |
+| **CI/CD** | Jenkinsfile | 8-stage declarative pipeline validating lint, test, build, and Docker release |
 
-### Entity-Relationship Diagram
+---
+
+## 🗄️ 5. Database Schema & Entity Relationships
+
+The schema consists of **17 normalized relational tables**:
 
 ```mermaid
 erDiagram
-    USERS ||--o{ CARTS : "has one active"
-    USERS ||--o{ ORDERS : "places"
-    USERS ||--o{ PAYMENTS : "makes"
-    RESTAURANTS ||--o{ MENU_CATEGORIES : "contains"
-    RESTAURANTS ||--o{ MENU_ITEMS : "prepares"
-    RESTAURANTS ||--o{ ORDERS : "fulfills"
-    MENU_CATEGORIES ||--o{ MENU_ITEMS : "groups"
-    CARTS ||--o{ CART_ITEMS : "contains"
-    MENU_ITEMS ||--o{ CART_ITEMS : "referenced by"
-    ORDERS ||--o{ ORDER_ITEMS : "contains"
-    ORDERS ||--|| PAYMENTS : "settled via"
-    ORDERS ||--o{ ORDER_TRACKING : "tracked via"
-    MENU_ITEMS ||--o{ ORDER_ITEMS : "snapshots"
+    USERS ||--o{ PROPERTIES : manages
+    USERS ||--o{ FAVOURITES : saves
+    USERS ||--o{ PROPERTY_COMPARISONS : compares
+    USERS ||--o{ ENQUIRIES : submits
+    USERS ||--o{ SITE_VISITS : schedules
+    USERS ||--o{ CALLBACKS : requests
+    USERS ||--o{ LEADS : assigned_to
+    USERS ||--o{ AUDIT_LOGS : performs
 
-    USERS {
-        int id PK
-        string name
-        string email UK
-        string password_hash
-        string phone
-        string role
-        text address
-        string city
-        datetime created_at
-    }
+    DEVELOPERS ||--o{ PROPERTIES : develops
+    LOCATIONS ||--o{ PROPERTIES : contains
 
-    RESTAURANTS {
-        int id PK
-        string name
-        string slug UK
-        text description
-        string address
-        string city
-        decimal rating
-        int delivery_time_min
-        int delivery_time_max
-        decimal price_for_two
-        string cuisine_types
-        text image_url
-        boolean is_active
-    }
+    PROPERTIES ||--o{ PROPERTY_IMAGES : has
+    PROPERTIES ||--o{ PROPERTY_AMENITIES : includes
+    AMENITIES ||--o{ PROPERTY_AMENITIES : tagged_in
+    PROPERTIES ||--o{ FAVOURITES : bookmarked_in
+    PROPERTIES ||--o{ PROPERTY_COMPARISONS : listed_in
+    PROPERTIES ||--o{ ENQUIRIES : referenced_by
+    PROPERTIES ||--o{ SITE_VISITS : visited_at
+    PROPERTIES ||--o{ LEADS : converts_for
+    PROPERTIES ||--o{ PROJECT_STATUS : tracks
 
-    MENU_CATEGORIES {
-        int id PK
-        int restaurant_id FK
-        string name
-        int display_order
-    }
-
-    MENU_ITEMS {
-        int id PK
-        int restaurant_id FK
-        int category_id FK
-        string name
-        text description
-        decimal price
-        boolean is_veg
-        boolean is_available
-        boolean is_popular
-        text image_url
-    }
-
-    CARTS {
-        int id PK
-        int user_id FK
-        int restaurant_id FK
-    }
-
-    CART_ITEMS {
-        int id PK
-        int cart_id FK
-        int menu_item_id FK
-        int quantity
-        decimal unit_price
-    }
-
-    COUPONS {
-        int id PK
-        string code UK
-        string discount_type
-        decimal discount_value
-        decimal min_order_amount
-        decimal max_discount
-        boolean is_active
-    }
-
-    ORDERS {
-        int id PK
-        string order_number UK
-        int user_id FK
-        int restaurant_id FK
-        decimal subtotal
-        decimal delivery_fee
-        decimal tax_amount
-        decimal discount_amount
-        decimal total_amount
-        string coupon_code
-        string status
-        text delivery_address
-        string customer_phone
-    }
-
-    ORDER_ITEMS {
-        int id PK
-        int order_id FK
-        int menu_item_id FK
-        string item_name
-        int quantity
-        decimal unit_price
-        decimal total_price
-        boolean is_veg
-    }
-
-    PAYMENTS {
-        int id PK
-        int order_id FK
-        int user_id FK
-        string payment_method
-        string payment_status
-        string transaction_id UK
-        decimal amount
-    }
-
-    ORDER_TRACKING {
-        int id PK
-        int order_id FK
-        string status
-        string status_label
-        text description
-        datetime created_at
-    }
+    LEADS ||--o{ LEAD_NOTES : logs
+    LEADS ||--o{ FOLLOW_UPS : follows
 ```
+
+### Key Tables Summary:
+1. `users` — Authentication, role (`customer`, `consultant`, `admin`), profile data.
+2. `developers` — Top Mumbai builders (Godrej, Lodha, Oberoi, Prestige, Adani, etc.).
+3. `locations` — 20 Mumbai localities with region, PIN code, and latitude/longitude.
+4. `properties` — Listings with transaction type, price, carpet area, configuration, floor, parking, possession status, RERA number.
+5. `property_images` — Multi-image gallery with display order, primary flags, and alt text.
+6. `amenities` & `property_amenities` — Architectural features (Private Infinity Pool, Concierge, EV Charging, Helipad, etc.).
+7. `favourites` — User saved properties list with unique composite key `(user_id, property_id)`.
+8. `property_comparisons` — Comparison tray (enforced max 3 properties).
+9. `enquiries` — Inbound general enquiries with status tracking (`new`, `contacted`, `converted`, `closed`).
+10. `site_visits` — Scheduled physical and virtual property inspections with future date validation.
+11. `callbacks` — Immediate callback intake with preferred time slot and notes.
+12. `leads` — CRM pipeline with stages (`New`, `Contacted`, `Site Visit Scheduled`, `Negotiation`, `Closed Won`, `Closed Lost`) and estimated deal value.
+13. `lead_notes` — Timestamped consultant notes attached to CRM leads.
+14. `follow_ups` — Scheduled reminder follow-ups for consultants.
+15. `project_status` — Construction milestones, possession dates, and progress percentage.
+16. `audit_logs` — Administrative audit trail of system events.
 
 ---
 
-## 🔑 Login Demo Accounts (For Viva & Presentation)
+## 📡 6. REST API Documentation
 
-All demo accounts use the standard demo password: `Password123!` (pre-hashed with `bcrypt`). A convenient **1-Click Demo Switcher** is also built into the header of the website for effortless testing.
+All API responses follow the standard JSON envelope:
+`{ "success": true, "data": ..., "message": "..." }` or `{ "success": false, "error": "..." }`.
 
-| Role | Email | Password | Pre-loaded Data |
+| Endpoint | Method | Role | Description |
 | :--- | :--- | :--- | :--- |
-| **Customer** | `customer@example.com` | `Password123!` | Aarav Sharma • Has active order history & saved address |
-| **Restaurant Partner** | `restaurant@example.com` | `Password123!` | Chef Vikram Mehra • Kitchen orders & menu manager |
-| **System Admin** | `admin@example.com` | `Password123!` | System Administrator • Full access to admin dashboard |
+| `/api/health` | GET | Public | Health status check and system timestamp |
+| `/api/auth/register` | POST | Public | Register customer account with email/password validation |
+| `/api/auth/login` | POST | Public | Authenticate user and return signed JWT token |
+| `/api/auth/me` | GET | Authenticated | Retrieve current user profile and role details |
+| `/api/properties` | GET | Public | Search and filter listings (price, BHK, locality, pagination) |
+| `/api/properties/:idOrSlug` | GET | Public | Fetch comprehensive listing with gallery, builder, amenities |
+| `/api/properties` | POST | Admin | Create a new property listing |
+| `/api/properties/:id` | PUT | Admin | Update property details and status |
+| `/api/properties/:id` | DELETE | Admin | Soft or hard delete property listing |
+| `/api/locations` | GET | Public | List all 20 Mumbai localities with live listing counts |
+| `/api/developers` | GET | Public | List developer profiles and total project portfolios |
+| `/api/amenities` | GET | Public | Retrieve curated residential and commercial amenities |
+| `/api/favourites` | GET | Customer | Retrieve current user saved properties |
+| `/api/favourites/:propertyId` | POST | Customer | Toggle or add property to user saved list |
+| `/api/favourites/:propertyId` | DELETE | Customer | Remove property from user saved list |
+| `/api/comparisons` | GET | Authenticated | Retrieve properties in the user comparison tray |
+| `/api/comparisons/:propertyId` | POST | Authenticated | Add property to comparison (enforced max 3) |
+| `/api/comparisons/:propertyId` | DELETE | Authenticated | Remove property from comparison |
+| `/api/enquiries` | POST | Public/User | Submit new general enquiry |
+| `/api/enquiries/my` | GET | Customer | View personal submitted enquiries |
+| `/api/enquiries` | GET | Consultant/Admin| List all client enquiries across platform |
+| `/api/enquiries/:id/status`| PATCH| Consultant/Admin| Update enquiry status and notes |
+| `/api/site-visits` | POST | Customer | Schedule a site visit (validated future date) |
+| `/api/site-visits/my` | GET | Customer | View personal scheduled site visits |
+| `/api/site-visits` | GET | Consultant/Admin| View all scheduled site visits |
+| `/api/site-visits/:id/status`| PATCH| Consultant/Admin| Confirm, reschedule, or complete visit |
+| `/api/callbacks` | POST | Public/User | Request priority phone callback |
+| `/api/leads` | GET | Consultant/Admin| View CRM lead pipeline with stage filtering |
+| `/api/leads/:id` | GET | Consultant/Admin| View full CRM lead timeline and interaction history |
+| `/api/leads/:id/notes` | POST | Consultant/Admin| Append internal consultant note to lead |
+| `/api/leads/:id/stage` | PATCH| Consultant/Admin| Move lead through pipeline stages |
+| `/api/admin/metrics` | GET | Admin | Aggregated stats: listings, leads, visits, closed revenue |
+| `/api/reports/analytics` | GET | Consultant/Admin| Data points for Recharts (by locality, stage, BHK) |
 
 ---
 
-## 🚀 Installation & Local Setup
+## 🔒 7. Security Model & Data Protection
 
-### Prerequisites
-- **Node.js** (v18 or higher) & **npm** (v9 or higher)
-- **MySQL Server 8.0** (Optional: app automatically uses embedded SQLite if MySQL credentials are not supplied)
-- **Git**
+- **Password Hashing:** Passwords hashed with `bcryptjs` using 10 salt rounds. Plaintext passwords never stored.
+- **Stateless JWT Tokens:** Signed tokens verifying identity, user ID, and role. Tokens expire in 7 days.
+- **Role-Based Access Control (RBAC):** Middleware checks verify whether a user is `customer`, `consultant`, or `admin` before granting access to sensitive routes.
+- **SQL Injection Prevention:** Parameterized SQL queries (`?`) across both MySQL and SQLite drivers.
+- **Rate Limiting:** `express-rate-limit` prevents brute-force attempts on sensitive and public routes (200 requests per 15-minute window).
+- **CORS & Input Sanitization:** Explicit CORS origin restriction and clean input validation on all lead forms.
 
-### Step 1: Clone and Install
+---
+
+## 🚀 8. Setup & Installation Guide
+
+### Prerequisites:
+- **Node.js** v20.0.0 or higher
+- **npm** v9.0.0 or higher
+- **MySQL 8.0** (optional; SQLite fallback initializes automatically if MySQL is absent)
+- **Docker & Docker Compose** (optional, for containerized run)
+
+### Option A: Local Development Setup (Quickest)
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/swayam699/online-food-ordering-system.git homes2own
+   cd homes2own
+   ```
+
+2. **Configure Environment Variables:**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Install Backend Dependencies:**
+   ```bash
+   cd backend
+   npm install
+   ```
+
+4. **Install Frontend Dependencies:**
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+
+5. **Start Development Servers:**
+   - In terminal 1 (Backend API on port 5000):
+     ```bash
+     cd backend
+     npm run dev
+     ```
+   - In terminal 2 (Vite Client on port 5173):
+     ```bash
+     cd frontend
+     npm run dev
+     ```
+
+6. Open your browser at **`http://localhost:5173`**.
+
+---
+
+### Option B: Docker Compose Deployment
+
+Run the complete 3-tier production stack (MySQL 8.0 container + Node.js backend container + Nginx frontend container):
+
 ```bash
-git clone https://github.com/your-username/online-food-ordering-system.git
-cd online-food-ordering-system
-
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
+docker-compose up --build -d
 ```
 
-### Step 2: Environment Configuration
-Copy `.env.example` in `backend/.env`:
-```env
-PORT=5000
-NODE_ENV=development
-JWT_SECRET=super_secret_food_ordering_jwt_key_2026_prod
-JWT_EXPIRES_IN=7d
+- **Frontend Client (Nginx):** `http://localhost`
+- **Backend API:** `http://localhost:5000/api`
+- **MySQL Database:** `localhost:3306`
 
-# MySQL Configuration
-DB_CLIENT=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=food_ordering_db
-```
-*(Note: If local MySQL is not running or your password differs, the server automatically boots into embedded SQLite with pre-seeded data, ensuring zero downtime).*
-
-### Step 3: Initialize Database (MySQL)
-To run the DDL schema and realistic seed data against your local MySQL instance:
+To shut down:
 ```bash
-cd backend
-npm run db:init
-```
-
-### Step 4: Running the Applications
-Open two terminal windows:
-
-**Terminal 1 (Backend API Server):**
-```bash
-cd backend
-npm start
-# Server starts on http://localhost:5000
-# Health check: http://localhost:5000/api/health
-```
-
-**Terminal 2 (Frontend Client):**
-```bash
-cd frontend
-npm run dev
-# Vite runs on http://localhost:5173
-```
-
-Alternatively, from the project root:
-```bash
-npm run dev
+docker-compose down
 ```
 
 ---
 
-## 🧪 Automated Testing (Jest + Supertest)
+## 🧪 9. Testing Guide
 
-The project includes an integration and unit test suite verifying user registration, login, restaurant filtering, menu search, cart updates, order creation, and admin role authorization guards.
+The platform includes an automated integration and API test suite covering all 18 Section 27 test scenarios using Jest and Supertest.
 
-Run tests:
+Run the test suite:
 ```bash
 cd backend
 npm test
 ```
 
-### Test Results
-```
-PASS tests/api.test.js
-  Online Food Ordering System - Integration & API Test Suite
-    Health API
-      √ should return 200 and healthy status
-    Authentication Endpoints
-      √ should register a new customer successfully
-      √ should reject registration with duplicate email
-      √ should log in customer with valid credentials and return JWT
-      √ should reject login with wrong password
-      √ should log in demo admin account
-    Restaurants Endpoints
-      √ should retrieve list of all active restaurants
-      √ should filter restaurants by cuisine
-      √ should retrieve restaurant details with full menu categories
-    Menu Endpoints
-      √ should search dishes by query
-      √ should retrieve single menu item by ID
-    Cart Endpoints
-      √ should return empty cart initially for new customer
-      √ should add item to cart
-      √ should update cart item quantity
-    Coupon Endpoints
-      √ should validate and apply active coupon code WELCOME50
-      √ should reject invalid coupon code
-    Order Operations
-      √ should place an order successfully from cart items
-      √ should retrieve customer order history including newly created order
-      √ should retrieve order details with live tracking timeline
-    Admin Authorization & Dashboard
-      √ should reject access to admin stats for unauthorized request
-      √ should forbid customer role from accessing admin stats
-      √ should permit admin role to access dashboard statistics
-      √ should allow admin to update order status
-
-Test Suites: 1 passed, 1 total
-Tests:       23 passed, 23 total
-```
+### What is tested:
+- System Healthcheck
+- Customer Registration (unique email validation, field integrity)
+- Customer, Consultant, and Admin Login (JWT issuance)
+- Auth Session verification (`/api/auth/me`)
+- Property Listing, Search, BHK Filters, Transaction Type Filters, Price Sorting
+- Full Property Specification Detail retrieval
+- 20 Mumbai Localities and Developer catalogs
+- Favourites Add, Duplicate Handling, Check, List, and Delete
+- Comparison Matrix Add, List, and Delete (enforced max 3)
+- Lead & Enquiry Ingestion, Personal Enquiry view, Consultant pipeline update
+- Site Visit Scheduling with future-date validation (rejection of past dates)
+- Callback requests intake
+- Consultant CRM Leads, Timeline history, and Internal Notes
+- Admin Authorization restrictions (Customer role rejection)
+- Admin Aggregated Metrics & Recharts Analytics
 
 ---
 
-## 🐳 Docker Deployment
+## 🔁 10. CI/CD Pipeline (Jenkinsfile)
 
-The application includes multi-stage container builds and Docker Compose orchestration:
-
-```bash
-docker-compose up --build
-```
-
-This starts:
-1. `food_ordering_mysql` on port `3306` (with auto-executed schema and seed data).
-2. `food_ordering_backend` on port `5000`.
-3. `food_ordering_frontend` on port `80` (served with production Nginx).
-
-Access the website at `http://localhost`.
+The repository includes a declarative `Jenkinsfile` with 8 sequential stages:
+1. **Checkout:** Clones the latest branch from Git SCM.
+2. **Environment Validation:** Asserts Node, npm, and Docker environment availability.
+3. **Install Backend Dependencies:** Executes `npm ci` in `backend/`.
+4. **Install Frontend Dependencies:** Executes `npm ci` in `frontend/`.
+5. **Lint & Code Quality Checks:** Validates Node syntax on server entrypoints.
+6. **Run Backend Integration Tests:** Runs Jest suite and Supertest assertions.
+7. **Build Frontend Assets:** Compiles production bundle with Vite.
+8. **Build Docker Images:** Builds backend and frontend production images (conditional on main branch).
 
 ---
 
-## ⚙️ Jenkins CI/CD Pipeline
+## 🔑 11. Demo Accounts & Credentials
 
-The included `Jenkinsfile` provides a Declarative Pipeline containing:
-- **Checkout:** Pulls repository from source control.
-- **Install Dependencies:** Parallel installs for backend and frontend packages.
-- **Run Automated Tests:** Executes Jest test suite in CI mode.
-- **Build Frontend:** Compiles production bundle with Vite & Tailwind CSS.
-- **Build Backend:** Validates Node syntax and entry scripts.
-- **Post-Action Notifications:** Reports build and test success/failure.
+For quick evaluation, pre-seeded accounts with 1-click login buttons are available on the **`/login`** page:
 
----
-
-## 📡 REST API Reference
-
-### Authentication & Users
-- `POST /api/auth/register` — Register customer account
-- `POST /api/auth/login` — Authenticate and receive JWT
-- `GET /api/users/profile` — Get authenticated user details *(Bearer Token)*
-- `PUT /api/users/profile` — Update address, phone, and name *(Bearer Token)*
-
-### Restaurants & Menus
-- `GET /api/restaurants` — Search, filter, and sort restaurants
-- `GET /api/restaurants/:idOrSlug` — Full restaurant menu grouped by categories
-- `POST /api/restaurants` — Create restaurant *(Admin / Partner)*
-- `PUT /api/restaurants/:id` — Update restaurant *(Admin / Partner)*
-- `DELETE /api/restaurants/:id` — Delete restaurant *(Admin)*
-- `GET /api/menu` — Global dish search & popular items
-- `POST /api/menu` — Add dish *(Admin / Partner)*
-- `PATCH /api/menu/:id/availability` — Toggle item availability *(Admin / Partner)*
-- `DELETE /api/menu/:id` — Delete dish *(Admin / Partner)*
-
-### Cart & Coupons
-- `GET /api/cart` — Get active cart with itemized subtotal & taxes
-- `POST /api/cart/items` — Add item to basket *(Handles restaurant conflict)*
-- `PUT /api/cart/items/:id` — Update item quantity (stepper)
-- `DELETE /api/cart/items/:id` — Remove item from basket
-- `DELETE /api/cart` — Clear entire basket
-- `GET /api/coupons` — List active promo campaigns
-- `POST /api/coupons/apply` — Validate code and compute discount
-- `POST /api/coupons` — Create promo code *(Admin)*
-
-### Orders & Tracking
-- `POST /api/orders` — Place order from basket with simulated payment
-- `GET /api/orders` — Customer order history
-- `GET /api/orders/:id` — Detailed order tracking & audit trail
-- `PATCH /api/orders/:id/status` — Advance status *(Admin / Partner)*
-- `POST /api/orders/:id/advance-stage` — Demo helper to advance order stage
-
-### Admin Console
-- `GET /api/admin/stats` — Gross revenue, orders count, popular dishes, daily trends
-- `GET /api/admin/orders` — Paginated order list with search & filters
-- `GET /api/admin/customers` — Customer accounts with lifetime metrics
-- `PATCH /api/admin/users/:id/status` — Suspend or activate customer account
+| Account Type | Email Address | Password | Role & Permissions |
+| :--- | :--- | :--- | :--- |
+| **Customer** | `customer@homes2own.com` | `Password123!` | Discovery, Favourites, Comparison tray, Book visits, Inquiries |
+| **Consultant** | `consultant@homes2own.com` | `Password123!` | CRM Lead pipeline, Client notes, Visit scheduling, Lead status |
+| **Administrator** | `admin@homes2own.com` | `Password123!` | Executive analytics, Closed deals value, Full property CRUD |
 
 ---
 
-## 💡 Viva / Presentation Walkthrough
+## 🏙️ 12. Key Features Walkthrough
 
-When presenting this project for college evaluation:
-1. **Homepage:** Demonstrate the location selector, category inspiration carousel, and live search box (typing "biryani" displays live instant dish & restaurant suggestions).
-2. **Menu Browsing:** Click into *Mumbai Spice* or *Pizza District*, use the sticky category pills, and add a dish to your basket.
-3. **Cart & Restaurant Conflict Handling:** Try adding an item from a second restaurant to demonstrate the conflict modal asking whether to clear or keep the previous order.
-4. **Checkout & Payment Simulation:**
-   - Apply coupon `WELCOME50` (50% OFF).
-   - Show the UPI QR Code, Card autofill helper, or COD.
-   - **Important:** Check the *"Simulate Payment Decline / Failure"* box to showcase graceful payment decline handling.
-   - Uncheck it and click *"Pay & Place Order"*.
-5. **Live Dynamic Order Tracking:**
-   - Show the 5-stage timeline backed by database logs.
-   - Click the *"Simulate Next Stage"* button to demonstrate live database status advancement (`Placed` → `Confirmed` → `Preparing` → `Out for Delivery` → `Delivered`).
-6. **Admin Dashboard:**
-   - Log in as `admin@example.com` or use the 1-Click Demo Switcher in the top navbar.
-   - Review live Revenue & Orders charts, toggle dish availability in the Menu Catalog, manage coupons, and inspect customer metrics.
-7. **Testing:** Run `npm test` in the terminal to show all 23 integration tests passing.
+### 1. Customer Discovery Flow
+- **Live Search Bar:** Search by keyword, transaction type (`Buy` / `Rent`), locality, and budget.
+- **Filter Sidebar & Mobile Drawer:** Filter by BHK (1 BHK to 5+ BHK), property type (`Apartment`, `Penthouse`, `Villa`, `Office`), possession status (`Ready to Move`, `Under Construction`), and specific amenities.
+- **Sort Options:** Price: Low to High, Price: High to Low, Area: Largest, Newest First.
+
+### 2. Side-by-Side Comparison Matrix
+- Compare up to 3 properties simultaneously.
+- Compares price, carpet area, configuration, price/sq.ft., floor, parking, possession status, developer, and full amenity tags side by side.
+
+### 3. Consultation & Site Visit Booking
+- Schedule a private viewing with date picker and preferred time slot.
+- Instant WhatsApp consultation with pre-filled message and property ID reference.
+
+### 4. Consultant CRM Dashboard
+- Track leads through all stages: `New`, `Contacted`, `Site Visit Scheduled`, `Negotiation`, `Closed Won`, `Closed Lost`.
+- Log time-stamped internal consultation notes.
+- Approve or reschedule site visits.
+
+### 5. Admin Analytics Console
+- Executive KPI Cards: Total Active Properties, Active Leads, Site Visits, Closed Revenue.
+- Recharts Visualizations: Properties by Mumbai Region, Lead Pipeline Breakdown, Configuration Distribution.
+- Comprehensive Property CRUD Modal with real-time editing and safe delete confirmation.
 
 ---
 
-## 📄 License
-This project is open-source and created for educational and college capstone demonstration purposes.
+## 🌆 13. Mumbai Real Estate Context
+
+Mumbai is India’s financial capital and the most valuable real estate market in South Asia:
+- **Localities Represented:** South Mumbai (Colaba, Marine Drive, Malabar Hill, Worli), Western Suburbs (Bandra West, Khar, Juhu, Andheri West), Central Mumbai (Lower Parel, Dadar, Wadala), and Eastern/Tech hubs (BKC, Powai, Thane).
+- **RERA Compliance:** Demonstrates compliance with Maharashtra Real Estate Regulatory Authority (MahaRERA) guidelines with clear RERA certificate identification.
+- **Pricing Landscape:** From luxury apartments at ₹45,000–₹1,20,000 per sq.ft. in South Mumbai to contemporary developments in Powai and Thane.
+
+---
+
+## 🗺️ 14. Future Roadmap
+
+- [ ] Interactive Leaflet/Mapbox Mumbai GIS map view with metro connectivity layers
+- [ ] 360-degree Matterport virtual property tour viewer integration
+- [ ] AI-powered Mumbai carpet area property valuation calculator
+- [ ] Automated SMS & WhatsApp status notifications via Twilio / Gupshup
+
+---
+
+## 📄 15. License & Attribution
+
+This project is licensed under the ISC License.  
+All architectural demo imagery and branding elements are curated for illustrative consultancy demonstration purposes.
+
+© 2026 **HOMES2OWN Real Estate Advisory**. All rights reserved.

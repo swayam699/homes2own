@@ -1,30 +1,30 @@
 {
-  "name": "online-food-ordering-system",
+  "name": "homes2own",
   "version": "1.0.0",
-  "description": "Production-style Online Food Ordering System with React, Node.js, Express, MySQL, Jest, Docker, and Jenkins",
+  "description": "HOMES2OWN — Full-Stack Real Estate Consultancy & Property Management Platform for Mumbai, Maharashtra",
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "bash render-build.sh",
-    "start": "cd backend && node src/server.js",
+    "start": "node backend/src/server.js",
     "test": "cd backend && npm test",
-    "db:init": "cd backend && node src/scripts/initDb.js",
+    "build": "cd frontend && npm run build",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
-    "dev": "node -e \"const { spawn } = require('child_process'); const b = spawn('npm', ['--prefix', 'backend', 'start'], { stdio: 'inherit', shell: true }); const f = spawn('npm', ['--prefix', 'frontend', 'run', 'dev'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { b.kill(); f.kill(); process.exit(); });\""
+    "seed": "cd backend && node src/scripts/initDb.js"
   },
   "keywords": [
-    "food-ordering",
+    "real-estate",
+    "mumbai-property",
+    "homes2own",
     "react",
     "express",
     "mysql",
+    "sqlite",
     "docker",
     "jenkins",
-    "jest",
-    "jwt",
-    "tailwind"
+    "jest"
   ],
-  "author": "College Full-Stack Capstone Project",
+  "author": "HOMES2OWN Engineering Team",
   "license": "ISC"
 }

@@ -1,143 +1,175 @@
 import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Lock, Mail, Shield, User, Briefcase, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { UtensilsCrossed, Lock, Mail, ArrowRight, ShieldCheck, User } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
 
-export const LoginPage = ({ onNavigate, onLoginSuccess }) => {
-  const { login, quickDemoLogin } = useAuth();
+export default function LoginPage() {
+  const { login } = useAuth();
+  const notify = useNotification();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
+    setLoading(true);
     try {
-      await login(email, password);
-      if (onLoginSuccess) onLoginSuccess();
+      const res = await login(email, password);
+      notify.success(`Welcome back, ${res.user.name}.`);
+      
+      if (res.user.role === 'admin') {
+        navigate('/admin');
+      } else if (res.user.role === 'consultant') {
+        navigate('/consultant');
+      } else {
+        navigate(from === '/login' ? '/dashboard' : from);
+      }
     } catch (err) {
-      setError(err.data?.message || err.message || 'Login failed');
+      notify.error(err.message || 'Invalid email or password.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const handleDemoClick = async (role) => {
-    setError('');
-    setIsSubmitting(true);
+  // Quick Demo Logins
+  const handleDemoLogin = async (demoEmail, demoRole) => {
+    setEmail(demoEmail);
+    setPassword('Password123!');
+    setLoading(true);
     try {
-      await quickDemoLogin(role);
-      if (onLoginSuccess) onLoginSuccess();
+      const res = await login(demoEmail, 'Password123!');
+      notify.success(`Signed in with Demo ${demoRole} account.`);
+      if (demoRole === 'Administrator') navigate('/admin');
+      else if (demoRole === 'Consultant') navigate('/consultant');
+      else navigate('/dashboard');
     } catch (err) {
-      setError(err.data?.message || err.message || 'Demo login failed');
+      notify.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200 p-8 shadow-card space-y-6">
-        {/* Brand */}
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center mx-auto shadow-md shadow-brand-500/20 font-bold">
-            <UtensilsCrossed className="w-6 h-6" />
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome back</h2>
-          <p className="text-xs text-slate-500">Sign in to CraveCart to manage orders, basket & profile</p>
-        </div>
-
-        {error && (
-          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium text-center">
-            {error}
-          </div>
-        )}
-
-        {/* Demo Fast Login Buttons (For Evaluator & Viva) */}
-        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block text-center">
-            ⚡ Quick 1-Click Demo Logins for Evaluation
+    <div className="max-w-md mx-auto px-4 py-16 space-y-8">
+      
+      {/* Brand Header */}
+      <div className="text-center space-y-2">
+        <Link to="/" className="inline-block">
+          <span className="font-serif text-3xl tracking-widest text-[#242521] font-semibold">
+            HOMES<span className="text-[#777B5A]">2</span>OWN
           </span>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleDemoClick('customer')}
-              className="py-1.5 px-2 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl text-[11px] font-bold text-slate-700 hover:text-emerald-700 transition-colors shadow-2xs text-center"
-            >
-              Customer
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoClick('restaurant_admin')}
-              className="py-1.5 px-2 bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-300 rounded-xl text-[11px] font-bold text-slate-700 hover:text-amber-700 transition-colors shadow-2xs text-center"
-            >
-              Partner
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoClick('admin')}
-              className="py-1.5 px-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 rounded-xl text-[11px] font-bold text-slate-700 hover:text-rose-700 transition-colors shadow-2xs text-center"
-            >
-              Admin
-            </button>
-          </div>
-        </div>
+        </Link>
+        <h1 className="font-serif text-2xl font-light text-[#242521]">
+          Sign In to Your Account
+        </h1>
+        <p className="text-xs text-[#71716D]">
+          Access your saved Mumbai properties, enquiries, and private advisory records.
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Main Login Card */}
+      <div className="bg-white border border-[#D9D4C9] p-8 rounded-xs shadow-editorial">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+            <label className="block font-medium text-[#242521] mb-1">Email Address</label>
             <div className="relative">
+              <Mail className="w-4 h-4 text-[#71716D] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="customer@example.com"
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:border-brand-500"
+                placeholder="name@example.com"
+                className="w-full pl-9 pr-3 py-2 bg-[#F7F5F0] border border-[#D9D4C9] rounded-xs text-[#242521] focus:border-[#777B5A]"
               />
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+            <label className="block font-medium text-[#242521] mb-1">Password</label>
             <div className="relative">
+              <Lock className="w-4 h-4 text-[#71716D] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:border-brand-500"
+                placeholder="••••••••"
+                className="w-full pl-9 pr-3 py-2 bg-[#F7F5F0] border border-[#D9D4C9] rounded-xs text-[#242521] focus:border-[#777B5A]"
               />
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+            disabled={loading}
+            className="w-full py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[#242521] hover:bg-[#777B5A] transition-colors rounded-xs shadow-subtle disabled:opacity-50"
           >
-            <span>{isSubmitting ? 'Signing in...' : 'Sign In'}</span>
-            <ArrowRight className="w-4 h-4" />
+            {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-slate-100">
-          <p className="text-xs text-slate-500">
-            Don't have an account yet?{' '}
-            <button
-              onClick={() => onNavigate('register')}
-              className="font-bold text-brand-600 hover:underline"
-            >
-              Sign Up
-            </button>
-          </p>
+        <div className="mt-6 pt-6 border-t border-[#F0ECE4] text-center text-xs text-[#71716D]">
+          Don&rsquo;t have a private account?{' '}
+          <Link to="/register" className="text-[#242521] font-semibold hover:text-[#777B5A]">
+            Register as Customer
+          </Link>
         </div>
       </div>
+
+      {/* Demo Credentials Fast-Access Panel */}
+      <div className="bg-[#EFECE3] border border-[#D9D4C9] p-5 rounded-xs space-y-3 text-xs">
+        <span className="text-[10px] uppercase tracking-wider font-semibold text-[#71716D] block">
+          Development Demo Accounts (1-Click Login)
+        </span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('customer@example.com', 'Customer')}
+            className="p-2.5 bg-white border border-[#D9D4C9] hover:border-[#777B5A] rounded-xs text-left transition-all"
+          >
+            <div className="flex items-center gap-1.5 font-bold text-[#242521]">
+              <User className="w-3.5 h-3.5 text-[#777B5A]" />
+              Customer
+            </div>
+            <p className="text-[10px] text-[#71716D] mt-0.5">customer@example.com</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('consultant@example.com', 'Consultant')}
+            className="p-2.5 bg-white border border-[#D9D4C9] hover:border-[#777B5A] rounded-xs text-left transition-all"
+          >
+            <div className="flex items-center gap-1.5 font-bold text-[#242521]">
+              <Briefcase className="w-3.5 h-3.5 text-[#777B5A]" />
+              Consultant
+            </div>
+            <p className="text-[10px] text-[#71716D] mt-0.5">consultant@example.com</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('admin@example.com', 'Administrator')}
+            className="p-2.5 bg-white border border-[#D9D4C9] hover:border-[#777B5A] rounded-xs text-left transition-all"
+          >
+            <div className="flex items-center gap-1.5 font-bold text-[#242521]">
+              <Shield className="w-3.5 h-3.5 text-[#777B5A]" />
+              Admin
+            </div>
+            <p className="text-[10px] text-[#71716D] mt-0.5">admin@example.com</p>
+          </button>
+        </div>
+        <p className="text-[10px] text-[#71716D] text-center">
+          Default development password for all demo accounts: <code className="text-[#242521]">Password123!</code>
+        </p>
+      </div>
+
     </div>
   );
-};
+}

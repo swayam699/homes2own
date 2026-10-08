@@ -1,20 +1,19 @@
 const bcrypt = require('bcryptjs');
-const db = require('../config/db');
+const { query } = require('../config/db');
 const { generateToken } = require('../config/jwt');
 const { validateEmail } = require('../middleware/validate');
 
 /**
- * Register a new user
- * POST /api/auth/register
+ * Register a new customer
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, address, city } = req.body;
+    const { name, email, password, phone } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, and password are required fields.',
+        message: 'Name, email, and password are required.',
       });
     }
 
@@ -28,70 +27,56 @@ const register = async (req, res, next) => {
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters long.',
+        message: 'Password must be at least 6 characters.',
       });
     }
 
-    // Check existing email
-    const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
-    if (existing.length > 0) {
+    // Check if user already exists
+    const [existing] = await query('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
+    if (existing && existing.length > 0) {
       return res.status(409).json({
         success: false,
         message: 'An account with this email address already exists.',
       });
     }
 
-    // Hash password
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    // Hash password (salt rounds 10)
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
 
-    // Default role is customer
-    const role = 'customer';
-
-    const [result] = await db.query(
-      `INSERT INTO users (name, email, password_hash, phone, role, address, city)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name.trim(), email.toLowerCase().trim(), passwordHash, phone || null, role, address || null, city || 'Mumbai']
+    // Default registration is strictly role: 'customer' (admin/consultant cannot be self-registered)
+    const [result] = await query(
+      `INSERT INTO users (name, email, password_hash, phone, role) 
+       VALUES (?, ?, ?, ?, 'customer')`,
+      [name.trim(), email.toLowerCase().trim(), passwordHash, phone ? phone.trim() : null]
     );
 
     const userId = result.insertId;
 
-    // Create user cart record
-    await db.query('INSERT OR IGNORE INTO carts (user_id) VALUES (?)', [userId]).catch(async () => {
-      // For MySQL syntax if INSERT OR IGNORE doesn't match:
-      try {
-        await db.query('INSERT IGNORE INTO carts (user_id) VALUES (?)', [userId]);
-      } catch (e) {
-        // Ignored
-      }
-    });
-
-    const userPayload = {
+    const user = {
       id: userId,
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      role,
       phone: phone || null,
-      address: address || null,
-      city: city || 'Mumbai',
+      role: 'customer',
+      avatar_url: null,
     };
 
-    const token = generateToken(userPayload);
+    const token = generateToken(user);
 
     res.status(201).json({
       success: true,
-      message: 'Account registered successfully.',
+      message: 'Account created successfully. Welcome to HOMES2OWN.',
       token,
-      user: userPayload,
+      user,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
 /**
- * Login existing user
- * POST /api/auth/login
+ * User login
  */
 const login = async (req, res, next) => {
   try {
@@ -100,25 +85,30 @@ const login = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide both email and password.',
+        message: 'Email and password are required.',
       });
     }
 
-    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email.toLowerCase().trim()]);
-    if (users.length === 0) {
+    const [rows] = await query(
+      `SELECT id, name, email, password_hash, phone, role, avatar_url, is_active,
+              preferred_locations, preferred_configurations, min_budget, max_budget
+       FROM users WHERE email = ?`,
+      [email.toLowerCase().trim()]
+    );
+
+    if (!rows || rows.length === 0) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'Invalid email address or password.',
       });
     }
 
-    const user = users[0];
+    const user = rows[0];
 
-    // Check if account is active
     if (!user.is_active) {
       return res.status(403).json({
         success: false,
-        message: 'Your account has been deactivated. Please contact support.',
+        message: 'Your account has been deactivated. Please contact HOMES2OWN administration.',
       });
     }
 
@@ -126,45 +116,60 @@ const login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'Invalid email address or password.',
       });
     }
 
-    const userPayload = {
+    // Safe user payload (never return password hash)
+    const safeUser = {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
       phone: user.phone,
-      address: user.address,
-      city: user.city,
+      role: user.role,
+      avatar_url: user.avatar_url,
+      preferred_locations: user.preferred_locations,
+      preferred_configurations: user.preferred_configurations,
+      min_budget: user.min_budget,
+      max_budget: user.max_budget,
     };
 
-    const token = generateToken(userPayload);
+    const token = generateToken(safeUser);
 
     res.json({
       success: true,
-      message: 'Logged in successfully.',
+      message: 'Signed in successfully.',
       token,
-      user: userPayload,
+      user: safeUser,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
 /**
- * Get current user profile
- * GET /api/users/profile
+ * Logout acknowledgment
  */
-const getProfile = async (req, res, next) => {
+const logout = async (req, res) => {
+  res.json({
+    success: true,
+    message: 'Signed out successfully from HOMES2OWN.',
+  });
+};
+
+/**
+ * Get current authenticated user
+ */
+const getMe = async (req, res, next) => {
   try {
-    const [rows] = await db.query(
-      'SELECT id, name, email, phone, role, address, city, created_at FROM users WHERE id = ?',
+    const [rows] = await query(
+      `SELECT id, name, email, phone, role, avatar_url, is_active,
+              preferred_locations, preferred_configurations, min_budget, max_budget, created_at
+       FROM users WHERE id = ?`,
       [req.user.id]
     );
 
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'User profile not found.',
@@ -175,47 +180,14 @@ const getProfile = async (req, res, next) => {
       success: true,
       user: rows[0],
     });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Update current user profile
- * PUT /api/users/profile
- */
-const updateProfile = async (req, res, next) => {
-  try {
-    const { name, phone, address, city } = req.body;
-
-    await db.query(
-      `UPDATE users 
-       SET name = COALESCE(?, name),
-           phone = COALESCE(?, phone),
-           address = COALESCE(?, address),
-           city = COALESCE(?, city)
-       WHERE id = ?`,
-      [name, phone, address, city, req.user.id]
-    );
-
-    const [rows] = await db.query(
-      'SELECT id, name, email, phone, role, address, city, created_at FROM users WHERE id = ?',
-      [req.user.id]
-    );
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully.',
-      user: rows[0],
-    });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
 module.exports = {
   register,
   login,
-  getProfile,
-  updateProfile,
+  logout,
+  getMe,
 };

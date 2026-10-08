@@ -2,79 +2,86 @@ version: '3.8'
 
 services:
   # -------------------------------------------------------------
-  # 1. MySQL 8.0 Relational Database Service
+  # 1. MySQL 8.0 Relational Database Engine
   # -------------------------------------------------------------
   mysql:
     image: mysql:8.0
-    container_name: food_ordering_mysql
+    container_name: homes2own_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_DATABASE: ${DB_NAME:-food_ordering_db}
-      MYSQL_USER: ${DB_USER:-fooduser}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-foodpass}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secure_pass}
+      MYSQL_DATABASE: ${DB_NAME:-homes2own_db}
+      MYSQL_USER: ${DB_USER:-homes2own_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-homes2own_secure_pass}
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - homes2own_mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secure_pass}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - food_network
+      - homes2own_network
 
   # -------------------------------------------------------------
-  # 2. Node.js + Express.js Backend API Service
+  # 2. Node.js + Express.js Advisory Backend API Service
   # -------------------------------------------------------------
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: food_ordering_backend
+    container_name: homes2own_backend
     restart: always
     environment:
       PORT: 5000
       NODE_ENV: production
-      JWT_SECRET: ${JWT_SECRET:-super_secret_food_ordering_jwt_key_2026_prod}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      JWT_SECRET: ${JWT_SECRET:-homes2own_jwt_secret_mumbai_advisory_2026_super_key}
       JWT_EXPIRES_IN: 7d
       DB_CLIENT: mysql
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: ${DB_PASSWORD:-root}
-      DB_NAME: ${DB_NAME:-food_ordering_db}
+      DB_USER: ${DB_USER:-homes2own_user}
+      DB_PASSWORD: ${DB_PASSWORD:-homes2own_secure_pass}
+      DB_NAME: ${DB_NAME:-homes2own_db}
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX: 200
+      WHATSAPP_PHONE: ${WHATSAPP_PHONE:-919820155443}
+      CONSULTANT_EMAIL: ${CONSULTANT_EMAIL:-advisory@homes2own.com}
+      OFFICE_PHONE: ${OFFICE_PHONE:-+912261208800}
+      APP_DOMAIN: ${APP_DOMAIN:-homes2own.com}
     ports:
       - "5000:5000"
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - food_network
+      - homes2own_network
 
   # -------------------------------------------------------------
-  # 3. React.js + Tailwind CSS Frontend (Nginx) Service
+  # 3. React.js + Tailwind CSS Client (Production Nginx)
   # -------------------------------------------------------------
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: food_ordering_frontend
+    container_name: homes2own_frontend
     restart: always
     ports:
       - "80:80"
     depends_on:
       - backend
     networks:
-      - food_network
+      - homes2own_network
 
 networks:
-  food_network:
+  homes2own_network:
     driver: bridge
 
 volumes:
-  mysql_data:
+  homes2own_mysql_data:
     driver: local
