@@ -40,7 +40,7 @@ export default function AboutPage() {
           <Building className="w-8 h-8 text-[#777B5A]" />
           <h3 className="font-serif text-xl font-bold text-[#242521]">MahaRERA & Title Integrity</h3>
           <p className="text-xs text-[#71716D] leading-relaxed">
-            We operate in strict alignment with Maharashtra Real Estate Regulatory Authority standards. We never fabricate registrations and mandate clear disclosure of project status.
+            We operate in strict alignment with Maharashtra Real Estate Regulatory Authority standards as a registered real estate advisory practice (<strong className="text-[#242521] font-mono">MahaRERA: A011182502918</strong>). We mandate verified disclosure of project titles, sanctions, and development milestones.
           </p>
         </div>
 

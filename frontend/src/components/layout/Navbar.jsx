@@ -59,8 +59,8 @@ export default function Navbar() {
                 <span className="font-serif text-2xl sm:text-3xl tracking-widest text-[#242521] font-semibold leading-tight">
                   HOMES<span className="text-[#777B5A]">2</span>OWN
                 </span>
-                <span className="text-[10px] tracking-[0.25em] text-[#71716D] uppercase font-sans">
-                  Mumbai Property Advisory
+                <span className="text-[10px] tracking-[0.18em] text-[#71716D] uppercase font-sans">
+                  Mumbai Advisory • MahaRERA: A011182502918
                 </span>
               </div>
             </Link>

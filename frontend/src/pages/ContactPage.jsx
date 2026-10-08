@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, CheckCircle2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, CheckCircle2, ShieldCheck } from 'lucide-react';
 import client from '../api/client';
 import { useNotification } from '../context/NotificationContext';
 
@@ -88,6 +88,16 @@ export default function ContactPage() {
               <div>
                 <strong className="text-[#242521] block">Advisory Hours</strong>
                 <p className="text-[#71716D] mt-0.5">Monday to Saturday: 09:30 AM – 07:00 PM IST</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-[#777B5A] shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-[#242521] block">MahaRERA Registration</strong>
+                <p className="text-[#777B5A] font-mono text-xs font-semibold mt-0.5">
+                  Agent Reg. No: A011182502918
+                </p>
               </div>
             </div>
           </div>

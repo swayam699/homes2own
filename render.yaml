@@ -34,5 +34,9 @@ services:
         value: advisory@homes2own.com
       - key: OFFICE_PHONE
         value: "+919664586316"
+      - key: OFFICE_ADDRESS
+        value: "Chembur, Mumbai - 400071, Maharashtra, India"
+      - key: MAHARERA_AGENT_NUMBER
+        value: "A011182502918"
       - key: RATE_LIMIT_MAX
         value: "200"

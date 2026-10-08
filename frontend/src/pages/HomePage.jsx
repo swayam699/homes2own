@@ -99,9 +99,14 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
           <div className="max-w-2xl space-y-4">
-            <span className="inline-block text-xs uppercase tracking-[0.25em] text-[#777B5A] font-semibold">
-              Mumbai Advisory & Property Consultancy
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-block text-xs uppercase tracking-[0.25em] text-[#777B5A] font-semibold">
+                Mumbai Advisory & Property Consultancy
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-white/10 border border-white/20 rounded-xs text-[10px] text-[#D9D4C9] font-mono tracking-wider">
+                MahaRERA: A011182502918
+              </span>
+            </div>
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-light leading-[1.1] text-[#F7F5F0]">
               Find a Place That Feels Like Yours.
             </h1>

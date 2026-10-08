@@ -43,6 +43,10 @@ export default function Footer() {
                 <Mail className="w-4 h-4 text-[#777B5A] shrink-0" />
                 <span>advisory@homes2own.com</span>
               </div>
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-[#777B5A] shrink-0" />
+                <span>MahaRERA Reg. No: <strong className="text-white font-mono">A011182502918</strong></span>
+              </div>
             </div>
           </div>
 
@@ -101,7 +105,7 @@ export default function Footer() {
           <div className="p-3.5 bg-[#2A2B27] rounded-xs border border-[#3C3E2C] flex items-start gap-3">
             <ShieldAlert className="w-5 h-5 text-[#777B5A] shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#A8A296] leading-relaxed">
-              <strong className="text-white">Advisory Demonstration Notice:</strong> Properties, prices, architectural metrics, and development timelines showcased on this platform are curated demonstration representations for illustrative consultancy display. All registered trademarks, builder identities, and project titles belong to their respective proprietors. Unverified RERA numbers are marked as &ldquo;Not provided&rdquo;. Always verify statutory title documentation and sanctioned RERA certificates before executing real property contracts.
+              <strong className="text-white">MahaRERA Registered Real Estate Agent: A011182502918.</strong> Properties, prices, architectural metrics, and development timelines showcased on this platform are curated demonstration representations for illustrative consultancy display. All registered trademarks, builder identities, and project titles belong to their respective proprietors. Unverified RERA numbers are marked as &ldquo;Not provided&rdquo;. Always verify statutory title documentation and sanctioned RERA certificates before executing real property contracts.
             </p>
           </div>
 

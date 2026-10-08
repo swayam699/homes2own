@@ -348,7 +348,7 @@ For quick evaluation, pre-seeded accounts with 1-click login buttons are availab
 
 Mumbai is India’s financial capital and the most valuable real estate market in South Asia:
 - **Localities Represented:** South Mumbai (Colaba, Marine Drive, Malabar Hill, Worli), Western Suburbs (Bandra West, Khar, Juhu, Andheri West), Central Mumbai (Lower Parel, Dadar, Wadala), and Eastern/Tech hubs (BKC, Powai, Thane).
-- **RERA Compliance:** Demonstrates compliance with Maharashtra Real Estate Regulatory Authority (MahaRERA) guidelines with clear RERA certificate identification.
+- **RERA Compliance & Agent Certification:** Officially registered under the Maharashtra Real Estate Regulatory Authority (MahaRERA Agent Registration Certificate No: **A011182502918**), headquartered in Chembur, Mumbai - 400071. All listings adhere to statutory RERA disclosure mandates.
 - **Pricing Landscape:** From luxury apartments at ₹45,000–₹1,20,000 per sq.ft. in South Mumbai to contemporary developments in Powai and Thane.
 
 ---

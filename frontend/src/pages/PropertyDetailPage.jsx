@@ -641,6 +641,9 @@ export default function PropertyDetailPage() {
               <div className="pt-1 text-[11px] text-[#242521] font-medium">
                 Direct Desk: +91 96645 86316
               </div>
+              <div className="text-[10px] text-[#71716D]">
+                Agent MahaRERA: <span className="font-mono font-semibold text-[#242521]">A011182502918</span>
+              </div>
             </div>
 
           </div>
